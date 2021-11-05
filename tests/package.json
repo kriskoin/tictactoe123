@@ -1,0 +1,22 @@
+{
+  "name": "tictactoetests",
+  "version": "1.0.0",
+  "description": "Unit test for tictactoe game",
+  "main": "mocha",
+  "author": "kriskoin https://github.com/kriskoin",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "createacc": "mocha --timeout 18000 create_test_accts.js",
+    "deleteacc": "mocha --timeout 18000 delete_test_accts.js"
+  },
+  "dependencies": {
+    "chai": "^4.2.0",
+    "eosjs": "^20.0.3",
+    "lodash": "^4.17.15",
+    "lodash.get": "^4.4.2",
+    "lodash.isequal": "^4.5.0",
+    "mocha": "^7.0.1",
+    "node-fetch": "^2.6.0"
+  }
+}
