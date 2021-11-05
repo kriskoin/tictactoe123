@@ -13,16 +13,16 @@ const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');      // devel
 const fetch = require('node-fetch');                                    // node only; not needed in browsers
 const { TextEncoder, TextDecoder } = require('util');                   // node only; native TextEncoder/Decoder
 
-const contract_name="ggoodsggoods";
+
 
 const acct_priv_key='5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3';
 const acct_pub_key='EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV';
 
 //host and challenger  test accounts
 const host_1       = 'gamehost1111'; 
-const chagenller_1 = 'gamechagen11';
+const challenger_1 = 'gamechallen1';
 const host_2       = 'gamehost2222'; 
-const chagenller_2 = 'gamechagen22';
+const challenger_2 = 'gamechallen2';
 
 const signatureProvider = new JsSignatureProvider([acct_priv_key]);
 const rpc = new JsonRpc('http://localhost:8888', { fetch });
@@ -96,7 +96,7 @@ describe ('tictactoe creating tests accounts \n', function(){
               ],
               data: {
                 creator: 'eosio',
-                name: chagenller_1,
+                name: challenger_1,
                 owner: {
                   threshold: 1,
                   keys: [{
@@ -194,7 +194,7 @@ describe ('tictactoe creating tests accounts \n', function(){
               ],
               data: {
                 creator: 'eosio',
-                name: chagenller_2,
+                name: challenger_2,
                 owner: {
                   threshold: 1,
                   keys: [{

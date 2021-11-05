@@ -17,7 +17,7 @@ build to run on ubuntu 18
 ```yarn add eosjs```
 ```yarn install```
 
-2) Accounts gamehost1111, gamechagen11,gamehost2222,gamechagen22 must exits in the blockchain
+2) Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the blockchain
 ## How to Run tests
 
 ```yarn createacc```
