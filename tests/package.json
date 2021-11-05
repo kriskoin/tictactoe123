@@ -7,8 +7,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "createacc": "mocha --timeout 18000 create_test_accts.js",
-    "deleteacc": "mocha --timeout 18000 delete_test_accts.js"
+    "createacc": "mocha --timeout 18000 create_test_accts.js"
   },
   "dependencies": {
     "chai": "^4.2.0",

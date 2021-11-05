@@ -30,6 +30,201 @@ const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), te
 const get = require('lodash.get')
 var chai = require('chai'),assert = chai.assert;
 
-describe ('tictactoes tests', function(){
-  
+describe ('tictactoe creating tests accounts \n', function(){
+  it("create test account: host_1 \n", async () => {
+    try {
+      const result = await api.transact(
+        {
+          actions: [
+            {
+              account: "eosio",
+              name: "newaccount",
+              authorization: [
+                {
+                  actor: "eosio",
+                  permission: "active",
+                },
+              ],
+              data: {
+                creator: 'eosio',
+                name: host_1,
+                owner: {
+                  threshold: 1,
+                  keys: [{
+                    key: acct_pub_key,
+                    weight: 1
+                  }],
+                  accounts: [],
+                  waits: []
+                },
+                active: {
+                  threshold: 1,
+                  keys: [{
+                    key: acct_pub_key,
+                    weight: 1
+                  }],
+                  accounts: [],
+                  waits: []
+                },
+              },//
+            },
+          ],
+        },
+        {
+          blocksBehind: 3,
+          expireSeconds: 30,
+        }
+      );
+    } catch (err) {
+      console.log('\nCaught exception: ' + err);
+    }
+  });
+
+  it("create test account: chagenller_1 \n", async () => {
+    try {
+      const result = await api.transact(
+        {
+          actions: [
+            {
+              account: "eosio",
+              name: "newaccount",
+              authorization: [
+                {
+                  actor: "eosio",
+                  permission: "active",
+                },
+              ],
+              data: {
+                creator: 'eosio',
+                name: chagenller_1,
+                owner: {
+                  threshold: 1,
+                  keys: [{
+                    key: acct_pub_key,
+                    weight: 1
+                  }],
+                  accounts: [],
+                  waits: []
+                },
+                active: {
+                  threshold: 1,
+                  keys: [{
+                    key: acct_pub_key,
+                    weight: 1
+                  }],
+                  accounts: [],
+                  waits: []
+                },
+              },//
+            },
+          ],
+        },
+        {
+          blocksBehind: 3,
+          expireSeconds: 30,
+        }
+      );
+    } catch (err) {
+      console.log('\nCaught exception: ' + err);
+    }
+  });
+
+  it("create test account: host_2 \n", async () => {
+    try {
+      const result = await api.transact(
+        {
+          actions: [
+            {
+              account: "eosio",
+              name: "newaccount",
+              authorization: [
+                {
+                  actor: "eosio",
+                  permission: "active",
+                },
+              ],
+              data: {
+                creator: 'eosio',
+                name: host_2,
+                owner: {
+                  threshold: 1,
+                  keys: [{
+                    key: acct_pub_key,
+                    weight: 1
+                  }],
+                  accounts: [],
+                  waits: []
+                },
+                active: {
+                  threshold: 1,
+                  keys: [{
+                    key: acct_pub_key,
+                    weight: 1
+                  }],
+                  accounts: [],
+                  waits: []
+                },
+              },//
+            },
+          ],
+        },
+        {
+          blocksBehind: 3,
+          expireSeconds: 30,
+        }
+      );
+    } catch (err) {
+      console.log('\nCaught exception: ' + err);
+    }
+  });
+
+  it("create test account: chagenller_2 \n", async () => {
+    try {
+      const result = await api.transact(
+        {
+          actions: [
+            {
+              account: "eosio",
+              name: "newaccount",
+              authorization: [
+                {
+                  actor: "eosio",
+                  permission: "active",
+                },
+              ],
+              data: {
+                creator: 'eosio',
+                name: chagenller_2,
+                owner: {
+                  threshold: 1,
+                  keys: [{
+                    key: acct_pub_key,
+                    weight: 1
+                  }],
+                  accounts: [],
+                  waits: []
+                },
+                active: {
+                  threshold: 1,
+                  keys: [{
+                    key: acct_pub_key,
+                    weight: 1
+                  }],
+                  accounts: [],
+                  waits: []
+                },
+              },//
+            },
+          ],
+        },
+        {
+          blocksBehind: 3,
+          expireSeconds: 30,
+        }
+      );
+    } catch (err) {
+      console.log('\nCaught exception: ' + err);
+    }
+  });
+
 });
