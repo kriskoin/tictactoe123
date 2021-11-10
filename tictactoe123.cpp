@@ -22,7 +22,8 @@ CONTRACT tictactoe123 : public contract {
             print ("Hola amigos");
         }
 
-        ACTION create(  name challenger, name host ){
+        ACTION create( name host, name challenger ){
+            
             require_auth(host);
             check(challenger != host,"challenger and host must be diferent");
             games_table games(get_self(),get_self().value);
@@ -30,7 +31,7 @@ CONTRACT tictactoe123 : public contract {
             //checks for the chagenller
             auto idx_chg = games.get_index<name("idxchall")>();
             auto tmp_chg = idx_chg.lower_bound(challenger.value);
-            check(tmp_chg ==idx_chg.end(),"Challender already exits"); 
+            check(tmp_chg ==idx_chg.end(),"Challenger already exits"); 
 
             uint128_t tmp_key = uint128_t{host.value} << 64 | challenger.value;
             auto record = games.find( tmp_key);
@@ -43,9 +44,11 @@ CONTRACT tictactoe123 : public contract {
             }else{
                 print ("game already exits");
             }
+            
         }
 
-       ACTION close( const name challenger, const name host ){
+       ACTION close( const name host,const name challenger ){
+           
             require_auth(host);
             check(challenger != host,"challenger and host must be diferent");
             games_table games(get_self(),get_self().value);
@@ -54,6 +57,7 @@ CONTRACT tictactoe123 : public contract {
             if( record != games.end() ){
                 record = games.erase(record);
             }
+            
         }
-
+   
 };

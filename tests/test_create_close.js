@@ -31,8 +31,9 @@ const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), te
 const get = require('lodash.get')
 var chai = require('chai'),assert = chai.assert;
 
-describe ('tictactoe  testing create close actions  \n', function(){
-    it('call create action with unathorized account \n',async () => {
+describe ('tictactoe tests\n', function(){
+    
+    it("test create action with unauthorized account",async () => {
         try {
             const result = await api.transact({
                 actions: [{
@@ -52,16 +53,172 @@ describe ('tictactoe  testing create close actions  \n', function(){
                 expireSeconds: 30,
               });
           } catch (err) {
-            /*
             let errorMessage =  get(err, 'json.error.details[0].message')
             errorMessage && (errorMessage = errorMessage.replace('assertion failure with message:', '').trim())
-            assert.equal('eosio_assert_message_exception', get(err, 'json.error.name') || '')
-            assert.equal(errorMessage, 'Error: transaction declares authority '{'actor':'unauthorized','permission':'active'}', but does not have signatures for it.')
-            */
-            let errorMessage =  get(err, 'json.error.details[0].message')
-            console.log('\n' + errorMessage +'\n');
+            assert.equal(errorMessage, 'transaction declares authority \'{"actor":"unauthorized","permission":"active"}\', but does not have signatures for it.')
           }
     });
 
+    it("test close action with unauthorized account",async () => {
+       try {
+            const result = await api.transact({
+                actions: [{
+                  account: contract_name,
+                  name: 'close',
+                  authorization: [{
+                    actor: unauthorized_acc,
+                    permission: 'active',
+                  }],
+                  data: {
+                    host: host_1,
+                    challenger: challenger_1,
+                  },
+                }]
+              }, {
+                blocksBehind: 3,
+                expireSeconds: 30,
+              });
+         } catch (err) {            
+          let errorMessage =  get(err, 'json.error.details[0].message')
+          errorMessage && (errorMessage = errorMessage.replace('assertion failure with message:', '').trim())
+          assert.equal(errorMessage, 'transaction declares authority \'{"actor":"unauthorized","permission":"active"}\', but does not have signatures for it.')
+        } 
 
+    });
+
+    it("test create action with dup host name ",async () => {
+      try {
+          const result = await api.transact({
+              actions: [{
+                account: contract_name,
+                name: 'create',
+                authorization: [{
+                  actor: host_1,
+                  permission: 'active',
+                }],
+                data: {
+                  host: host_1,
+                  challenger: host_1,
+                },
+              }]
+            }, {
+              blocksBehind: 3,
+              expireSeconds: 30,
+            });
+        } catch (err) {
+          let errorMessage = get(err, "json.error.details[0].message");
+          errorMessage = errorMessage.replace("assertion failure with message:", "").trim();
+          assert.equal(errorMessage, "challenger and host must be diferent");
+        }
+    });
+
+    it("test close action with dup host name ",async () => {
+      try {
+          const result = await api.transact({
+              actions: [{
+                account: contract_name,
+                name: 'create',
+                authorization: [{
+                  actor: host_1,
+                  permission: 'active',
+                }],
+                data: {
+                  host: host_1,
+                  challenger: host_1,
+                },
+              }]
+            }, {
+              blocksBehind: 3,
+              expireSeconds: 30,
+            });
+        } catch (err) {
+          let errorMessage = get(err, "json.error.details[0].message");
+          errorMessage = errorMessage.replace("assertion failure with message:", "").trim();
+          assert.equal(errorMessage, "challenger and host must be diferent");
+        }
+    });
+
+    it("test create action host <> changenller",async () => {
+      try {
+          const result = await api.transact({
+              actions: [{
+                account: contract_name,
+                name: 'create',
+                authorization: [{
+                  actor: host_1,
+                  permission: 'active',
+                }],
+                data: {
+                  host: host_1,
+                  challenger: challenger_1,
+                },
+              }]
+            }, {
+              blocksBehind: 3,
+              expireSeconds: 30,
+            });
+        } catch (err) {
+          console.log("\n action create caught exception: " + err);
+        }
+    });    
 });
+
+describe ('tictactoe tests dup game\n', function(){
+  
+  it("test create action with dup game ", async() => {
+    
+    try {
+      
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'create',
+              authorization: [{
+                actor: host_1,
+                permission: 'active',
+              }],
+              data: {
+                host: host_1,
+                challenger: challenger_1,
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+        
+      } catch (err) {
+        let errorMessage = get(err, "json.error.details[0].message");
+        errorMessage = errorMessage.replace("assertion failure with message:", "").trim();
+        assert.equal(errorMessage, "Challenger already exits");
+      }
+    
+  });
+ 
+});  
+
+describe ('tictactoe test close\n', function(){
+  it("closing game",async () => {
+    try {
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'close',
+              authorization: [{
+                actor: host_1,
+                permission: 'active',
+              }],
+              data: {
+                host: host_1,
+                challenger: challenger_1,
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+      } catch (err) {
+        console.log("\n action close caught exception: " + err);
+      }
+  });
+});  

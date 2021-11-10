@@ -7,7 +7,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "createacc": "mocha --timeout 18000 create_test_accts.js",
+    "createacc": "mocha --timeout 1800 create_test_accts.js",
     "testcreate": "mocha --timeout 18000 test_create_close.js"
   },
   "dependencies": {
