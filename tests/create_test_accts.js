@@ -31,6 +31,55 @@ const get = require('lodash.get')
 var chai = require('chai'),assert = chai.assert;
 
 describe ('tictactoe creating tests accounts \n', function(){
+  it("create test account: tictactoe123 \n", async () => {
+    try {
+      const result = await api.transact(
+        {
+          actions: [
+            {
+              account: "eosio",
+              name: "newaccount",
+              authorization: [
+                {
+                  actor: "eosio",
+                  permission: "active",
+                },
+              ],
+              data: {
+                creator: 'eosio',
+                name: "tictactoe123",
+                owner: {
+                  threshold: 1,
+                  keys: [{
+                    key: acct_pub_key,
+                    weight: 1
+                  }],
+                  accounts: [],
+                  waits: []
+                },
+                active: {
+                  threshold: 1,
+                  keys: [{
+                    key: acct_pub_key,
+                    weight: 1
+                  }],
+                  accounts: [],
+                  waits: []
+                },
+              },//
+            },
+          ],
+        },
+        {
+          blocksBehind: 3,
+          expireSeconds: 30,
+        }
+      );
+    } catch (err) {
+      console.log('\nCaught exception: ' + err);
+    }
+  });
+
   it("create test account: host_1 \n", async () => {
     try {
       const result = await api.transact(

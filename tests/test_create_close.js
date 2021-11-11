@@ -164,7 +164,7 @@ describe ('tictactoe tests\n', function(){
 });
 
 describe ('tictactoe tests dup game\n', function(){
-  
+  this.retries(3);
   it("test create action with dup game ", async() => {
     
     try {
@@ -221,4 +221,30 @@ describe ('tictactoe test close\n', function(){
         console.log("\n action close caught exception: " + err);
       }
   });
+
 });  
+
+  
+describe ('tictactoe test clear\n', function(){
+  it("cleaning games' table",async () => {
+    try {
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'clear',
+              authorization: [{
+                actor: contract_name,
+                permission: 'active',
+              }],
+              data: {
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+      } catch (err) {
+        console.log("\n action clear caught exception: " + err);
+      }
+  });
+});
