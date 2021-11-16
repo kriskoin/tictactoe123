@@ -27,3 +27,4 @@ yarn install
 ```yarn createacc``` to create tests accounts
 ```yarn testcreate``` to test create and close  actions
 ```yarn testmove``` to test move action
+```yarn testwinner``` to test winner logic

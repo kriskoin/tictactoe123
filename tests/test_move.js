@@ -299,6 +299,28 @@ describe ('tictactoe test move action auth & range check\n', function(){
 
 describe ('tictactoe test move action invalid turn logic \n', function(){
 
+    it("cleaning games' table",async () => {
+      try {
+          const result = await api.transact({
+              actions: [{
+                account: contract_name,
+                name: 'clear',
+                authorization: [{
+                  actor: contract_name,
+                  permission: 'active',
+                }],
+                data: {
+                },
+              }]
+            }, {
+              blocksBehind: 3,
+              expireSeconds: 30,
+            });
+        } catch (err) {
+          console.log("\n action clear caught exception: " + err);
+        }
+  });
+
     it("create game",async () => {
         try {
             const result = await api.transact({
@@ -760,6 +782,6 @@ describe ('tictactoe test move action with invalid (used) position \n', function
             console.log("\n action close caught exception: " + err);
           }
      });   
-     
+ 
 });
  

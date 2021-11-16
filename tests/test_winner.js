@@ -51,9 +51,6 @@ challenger :3,2
 host:1,3
 challenger : 3,3
 
-
-challenger :
-host:
 */
 
 describe ('tictactoe test winner in a row  scenario 1 \n', function(){
@@ -261,10 +258,12 @@ describe ('tictactoe test winner in a row  scenario 1 \n', function(){
                 expireSeconds: 30,
               });
           } catch (err) {
-            console.log("\n host: 1,2 caught exception: " + err);
+            let errorMessage = get(err, "json.error.details[0].message");
+            errorMessage = errorMessage.replace("assertion failure with message:", "").trim();
+            assert.equal(errorMessage, "game is over, winner detected");
           }
       });
-
+      
     it(" close game",async () => {
         try {
             const result = await api.transact({
@@ -288,4 +287,508 @@ describe ('tictactoe test winner in a row  scenario 1 \n', function(){
             console.log("\n action close caught exception: " + err);
           }
      });
+     
+});
+
+/*
+scenario 2
+
+--------------------
+|  H  |     |  H  | 
+--------------------
+|  C  |  C  |  C  | 
+--------------------
+|     |     |     | 
+--------------------
+
+moves sequence:
+challenger : 2,1
+host: 1,1
+challenger :2,2
+host:1,3
+challenger : 2,3
+
+*/
+
+describe ('tictactoe test winner in a row  scenario 2 \n', function(){
+
+  it("create game",async () => {
+    try {
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'create',
+              authorization: [{
+                actor: host_1,
+                permission: 'active',
+              }],
+              data: {
+                host: host_1,
+                challenger: challenger_1,
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+      } catch (err) {
+        console.log("\n action create caught exception: " + err);
+      }
+ });    
+
+  it("challenger : 2,1",async () => {
+    try {
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'move',
+              authorization: [{
+                actor: challenger_1,
+                permission: 'active',
+              }],
+              data: {
+                host: host_1,
+                challenger: challenger_1,
+                by:challenger_1,
+                row:2,
+                column: 1
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+      } catch (err) {
+        console.log("\n challenger : 2,1 caught exception: " + err);
+      }
+  });
+
+  it("host: 1,1",async () => {
+    try {
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'move',
+              authorization: [{
+                actor: host_1,
+                permission: 'active',
+              }],
+              data: {
+                host: host_1,
+                challenger: challenger_1,
+                by:host_1,
+                row:1,
+                column: 1
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+      } catch (err) {
+        console.log("\n host: 1,1 caught exception: " + err);
+      }
+  });
+
+  it("challenger : 2,2",async () => {
+    try {
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'move',
+              authorization: [{
+                actor: challenger_1,
+                permission: 'active',
+              }],
+              data: {
+                host: host_1,
+                challenger: challenger_1,
+                by:challenger_1,
+                row:2,
+                column: 2
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+      } catch (err) {
+        console.log("\n challenger : 2,2 caught exception: " + err);
+      }
+  });
+
+  it("host: 1,3",async () => {
+    try {
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'move',
+              authorization: [{
+                actor: host_1,
+                permission: 'active',
+              }],
+              data: {
+                host: host_1,
+                challenger: challenger_1,
+                by:host_1,
+                row:1,
+                column: 3
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+      } catch (err) {
+        console.log("\n host: 1,3 caught exception: " + err);
+      }
+  });
+
+  it("challenger : 2,3",async () => {
+    try {
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'move',
+              authorization: [{
+                actor: challenger_1,
+                permission: 'active',
+              }],
+              data: {
+                host: host_1,
+                challenger: challenger_1,
+                by:challenger_1,
+                row:2,
+                column: 3
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+      } catch (err) {
+        console.log("\n challenger : 2,3 caught exception: " + err);
+      }
+  });
+
+  it("get winner",async () => {
+    try {
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'move',
+              authorization: [{
+                actor: host_1,
+                permission: 'active',
+              }],
+              data: {
+                host: host_1,
+                challenger: challenger_1,
+                by:host_1,
+                row:1,
+                column: 2
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+      } catch (err) {
+        let errorMessage = get(err, "json.error.details[0].message");
+        errorMessage = errorMessage.replace("assertion failure with message:", "").trim();
+        assert.equal(errorMessage, "game is over, winner detected");
+      }
+  });
+  
+it(" close game",async () => {
+    try {
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'close',
+              authorization: [{
+                actor: host_1,
+                permission: 'active',
+              }],
+              data: {
+                host: host_1,
+                challenger: challenger_1,
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+      } catch (err) {
+        console.log("\n action close caught exception: " + err);
+      }
+ });
+
+
+});
+
+
+/*
+scenario 3
+
+--------------------
+|  H  |  H  |  H  | 
+--------------------
+|  C  |     |     | 
+--------------------
+|  C  |  C  |     | 
+--------------------
+
+moves sequence:
+challenger : 2,1
+host: 1,1
+challenger :3,1
+host:1,3
+challenger : 3,2
+host:1,2
+
+*/
+
+describe ('tictactoe test winner in a row  scenario 3 \n', function(){
+
+  it("create game",async () => {
+    try {
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'create',
+              authorization: [{
+                actor: host_1,
+                permission: 'active',
+              }],
+              data: {
+                host: host_1,
+                challenger: challenger_1,
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+      } catch (err) {
+        console.log("\n action create caught exception: " + err);
+      }
+ });    
+
+  it("challenger : 2,1",async () => {
+    try {
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'move',
+              authorization: [{
+                actor: challenger_1,
+                permission: 'active',
+              }],
+              data: {
+                host: host_1,
+                challenger: challenger_1,
+                by:challenger_1,
+                row:2,
+                column: 1
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+      } catch (err) {
+        console.log("\n challenger : 2,1 caught exception: " + err);
+      }
+  });
+
+  it("host: 1,1",async () => {
+    try {
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'move',
+              authorization: [{
+                actor: host_1,
+                permission: 'active',
+              }],
+              data: {
+                host: host_1,
+                challenger: challenger_1,
+                by:host_1,
+                row:1,
+                column: 1
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+      } catch (err) {
+        console.log("\n host: 1,1 caught exception: " + err);
+      }
+  });
+
+  it("challenger : 3,1",async () => {
+    try {
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'move',
+              authorization: [{
+                actor: challenger_1,
+                permission: 'active',
+              }],
+              data: {
+                host: host_1,
+                challenger: challenger_1,
+                by:challenger_1,
+                row:3,
+                column: 1
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+      } catch (err) {
+        console.log("\n challenger : 3,1 caught exception: " + err);
+      }
+  });
+
+  it("host: 1,3",async () => {
+    try {
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'move',
+              authorization: [{
+                actor: host_1,
+                permission: 'active',
+              }],
+              data: {
+                host: host_1,
+                challenger: challenger_1,
+                by:host_1,
+                row:1,
+                column: 3
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+      } catch (err) {
+        console.log("\n host: 1,3 caught exception: " + err);
+      }
+  });
+
+  it("challenger : 3,2",async () => {
+    try {
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'move',
+              authorization: [{
+                actor: challenger_1,
+                permission: 'active',
+              }],
+              data: {
+                host: host_1,
+                challenger: challenger_1,
+                by:challenger_1,
+                row:3,
+                column: 2
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+      } catch (err) {
+        console.log("\n challenger : 3,2 caught exception: " + err);
+      }
+  });
+
+  it("host: 1,2",async () => {
+    try {
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'move',
+              authorization: [{
+                actor: host_1,
+                permission: 'active',
+              }],
+              data: {
+                host: host_1,
+                challenger: challenger_1,
+                by:host_1,
+                row:1,
+                column: 2
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+      } catch (err) {
+        console.log("\n host: 1,2 caught exception: " + err);
+      }
+  });
+
+  it("get winner",async () => {
+    try {
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'move',
+              authorization: [{
+                actor: challenger_1,
+                permission: 'active',
+              }],
+              data: {
+                host: host_1,
+                challenger: challenger_1,
+                by:challenger_1,
+                row:3,
+                column: 3
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+      } catch (err) {
+        let errorMessage = get(err, "json.error.details[0].message");
+        errorMessage = errorMessage.replace("assertion failure with message:", "").trim();
+        assert.equal(errorMessage, "game is over, winner detected");
+      }
+  });
+  
+it(" close game",async () => {
+    try {
+        const result = await api.transact({
+            actions: [{
+              account: contract_name,
+              name: 'close',
+              authorization: [{
+                actor: host_1,
+                permission: 'active',
+              }],
+              data: {
+                host: host_1,
+                challenger: challenger_1,
+              },
+            }]
+          }, {
+            blocksBehind: 3,
+            expireSeconds: 30,
+          });
+      } catch (err) {
+        console.log("\n action close caught exception: " + err);
+      }
+ });
+
+
 });

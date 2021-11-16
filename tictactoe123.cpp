@@ -75,9 +75,8 @@ CONTRACT tictactoe123 : public contract {
             uint128_t tmp_key = uint128_t{host.value} << 64 | challenger.value;
             auto itr = games.find( tmp_key);
             check(itr!=games.end(),"Game does not exists");
-             //TODO check winner logic
-            //check(record.winner == eosio::name("none") ,"game is over, winner detected");
 
+            check(itr->winner == eosio::name("none") ,"game is over, winner detected"); 
             //TODO , fix the tie logic
             //check(((record.winner == eosio::name("none")) && (record.marks==9)),"game is over, tie detected");
 
@@ -85,6 +84,8 @@ CONTRACT tictactoe123 : public contract {
 
             uint8_t board_position = get_position(row,column);
             check (is_empy_cell(board_position,itr->board),"This position is already used");
+
+            
             
             //mark the move within the board
             uint8_t player_mark;
@@ -100,8 +101,10 @@ CONTRACT tictactoe123 : public contract {
              games.modify(itr, get_self(), [&](auto &g) {
                 g.board[board_position] = player_mark;
                 g.turn = next_turn;
-                //g.winner = getWinner(g);
                 g.marks++;
+                
+                   g.winner = get_winner(g);
+            
             });
             
             
@@ -129,9 +132,94 @@ CONTRACT tictactoe123 : public contract {
             }
         }
 
-        //is_valid_movement()
-        //
-       //get_winner()
+    
+       /**
+        *
+        *  This fuction checks is a cell is empty
+        * 
+        * @param board - game board  std::vector<uint8_t>
+        *
+        */
+       name get_winner( const game &currentGame ){
+           
+           auto &board = currentGame.board;
+           uint8_t winner_value = 0;
+           name winner_name = eosio::name("none");
+           
+           //check the rows
+           for ( uint8_t r = LOW_BOUND_ROW; r <= HIGH_BOUND_ROW; r++){
+               winner_value = get_winner_value_by_row(r,currentGame.board);
+           }
+          
+           /*
+           if(!winner_value){
+            //check the columns
+            for ( uint8_t c = LOW_BOUND_COL; c <= HIGH_BOUND_COL; c++){
+
+            }
+           }
+
+           //check the cross
+           if(!winner_value){
+               
+           }
+           */
+           if ( winner_value == HOST_MARK  ){
+               winner_name = currentGame.host;
+           };
+
+           if ( winner_value == CHALLENGER_MARK ){
+               winner_name = currentGame.challenger;
+           }
+           
+          return winner_name;
+       }
+       
+        /**
+        *
+        *  This fuction returns the value presents in all
+        *  rows cells, 0 for no value
+        * 
+        * @param row - Row number to check
+        * @param board - game board  std::vector<uint8_t>
+        *
+        * @memo  the value or the row and column must be
+        *        within  [LOW_BOUND_ROW,HIGH_BOUND_ROW ]
+        *        and  [LOW_BOUND_COL,HIGH_BOUND_COL] ranges
+        */
+       uint8_t get_winner_value_by_row(const uint8_t row,std::vector<uint8_t>  board){
+           
+           if(board[get_position(row,1)] &&
+             (board[get_position(row,1)] == board[get_position(row,2)]) &&
+             (board[get_position(row,2)] == board[get_position(row,3)]) ){
+              return board[get_position(row,1)];  
+           }else{
+               return 0;
+           }
+           
+                       ;
+       }
+
+       /**
+        *
+        *  This fuction returns the value presents in all
+        *  column cells, 0 for no value
+        * 
+        * @param column - Row number to check
+        * @param board - game board  std::vector<uint8_t>
+        *
+        * @memo  the value or the row and column must be
+        *        within  [LOW_BOUND_ROW,HIGH_BOUND_ROW ]
+        *        and  [LOW_BOUND_COL,HIGH_BOUND_COL] ranges
+        */
+       uint8_t get_winner_value_by_column(const uint8_t column,std::vector<uint8_t> board){
+           if(board[get_position(1,column)]==board[get_position(2,column)]==board[get_position(3,column)]){
+              return board[get_position(1,column)];  
+           }else{
+               return 0;
+           }
+       }
+
 
         /**
         *
