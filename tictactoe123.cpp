@@ -20,6 +20,14 @@ CONTRACT tictactoe123 : public contract {
             name winner = eosio::name("none");
             std::vector<uint8_t> board = {0,0,0,0,0,0,0,0,0};
             uint8_t marks = 0;
+            
+            // Reset game
+            void reset_game(){
+                board.assign(HIGH_BOUND_COL * HIGH_BOUND_ROW, 0);
+                turn = challenger;
+                winner = eosio::name("none");
+                marks = 0;
+            }
             uint128_t primary_key() const { return id; }
             uint64_t  by_challenger() const { return challenger.value; }
             EOSLIB_SERIALIZE( game, (id)(challenger)(host)(turn)(winner)(board)(marks))
@@ -274,6 +282,32 @@ CONTRACT tictactoe123 : public contract {
             }else{
                 return false;
             }
+        }
+
+        
+        ACTION restart(const name challenger, const name host, const name by){
+            require_auth(by);
+            check(challenger != host,"challenger and host must be diferent");
+            
+            games_table games(get_self(),get_self().value);
+            uint128_t tmp_key = uint128_t{host.value} << 64 | challenger.value;
+            auto itr = games.find( tmp_key);
+            check(itr != games.end(),"Game does not exists");
+            /*
+            check(has_auth(by), "Only " + by.to_string() + "can restart the game.");
+
+            // Check if game exists
+            games existingHostGames(get_self(), host.value);
+            auto itr = existingHostGames.find(challenger.value);
+            check(itr != existingHostGames.end(), "Game does not exist.");
+
+            // Check if this game belongs to the action sender
+            check(by == itr->host || by == itr->challenger, "This is not your game.");
+            */
+            // Reset game
+            games.modify(itr, itr->host, [](auto &g) {
+                g.reset_game();
+            });
         }
 
 };

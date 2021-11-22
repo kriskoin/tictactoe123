@@ -32,3 +32,10 @@ spec-version: 0.1.0
 title: clear
 summary: The in
 icon: https://favicon.ico
+
+<h1 class="contract">restart</h1>
+---
+spec-version: 0.1.0
+title: restart
+summary: The in
+icon: https://favicon.ico
