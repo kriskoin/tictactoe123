@@ -77,8 +77,8 @@ CONTRACT tictactoe123 : public contract {
             check(itr!=games.end(),"Game does not exists");
 
             check(itr->winner == eosio::name("none") ,"game is over, winner detected"); 
-            //TODO , fix the tie logic
-            //check(((record.winner == eosio::name("none")) && (record.marks==9)),"game is over, tie detected");
+
+            check((itr->winner == eosio::name("none") && itr->marks != 9),"game is over, tie detected");
 
             check(itr->turn == by ,"is not your turn");
 
@@ -102,11 +102,10 @@ CONTRACT tictactoe123 : public contract {
                 g.board[board_position] = player_mark;
                 g.turn = next_turn;
                 g.marks++;
-                
+                if( 4 <= g.marks){
                    g.winner = get_winner(g);
-            
+                }
             });
-            
             
         }
 
@@ -131,7 +130,6 @@ CONTRACT tictactoe123 : public contract {
                 itr = games.erase(itr);
             }
         }
-
     
        /**
         *
@@ -147,23 +145,24 @@ CONTRACT tictactoe123 : public contract {
            name winner_name = eosio::name("none");
            
            //check the rows
-           for ( uint8_t r = LOW_BOUND_ROW; r <= HIGH_BOUND_ROW; r++){
+           for ( uint8_t r = LOW_BOUND_ROW; r <= HIGH_BOUND_ROW; r++){               
                winner_value = get_winner_value_by_row(r,currentGame.board);
+               if( winner_value ) break;
            }
-          
-           /*
-           if(!winner_value){
-            //check the columns
-            for ( uint8_t c = LOW_BOUND_COL; c <= HIGH_BOUND_COL; c++){
-
-            }
-           }
-
-           //check the cross
-           if(!winner_value){
                
+            //check the columns
+           if(!winner_value){
+                for ( uint8_t c = LOW_BOUND_COL; c <= HIGH_BOUND_COL; c++){
+                    winner_value = get_winner_value_by_column(c,currentGame.board);
+                    if( winner_value ) break;
+                }
+            }
+    
+           //check the cross           
+           if(!winner_value){
+               winner_value = get_winner_value_by_cross(currentGame.board);
            }
-           */
+           
            if ( winner_value == HOST_MARK  ){
                winner_name = currentGame.host;
            };
@@ -173,6 +172,21 @@ CONTRACT tictactoe123 : public contract {
            }
            
           return winner_name;
+       }
+
+       uint8_t get_winner_value_by_cross(std::vector<uint8_t> board){
+           if(board[get_position(1,1)] &&
+               board[get_position(1,1)] == board[get_position(2,2)] &&
+               board[get_position(2,2)] == board[get_position(3,3)] ){
+              return board[get_position(1,1)];  
+           }
+
+           if(board[get_position(3,1)] &&
+               board[get_position(3,1)] == board[get_position(2,2)] &&
+               board[get_position(2,2)] == board[get_position(1,3)] ){
+              return board[get_position(3,1)];  
+           }
+            return 0;
        }
        
         /**
@@ -188,7 +202,6 @@ CONTRACT tictactoe123 : public contract {
         *        and  [LOW_BOUND_COL,HIGH_BOUND_COL] ranges
         */
        uint8_t get_winner_value_by_row(const uint8_t row,std::vector<uint8_t>  board){
-           
            if(board[get_position(row,1)] &&
              (board[get_position(row,1)] == board[get_position(row,2)]) &&
              (board[get_position(row,2)] == board[get_position(row,3)]) ){
@@ -196,8 +209,6 @@ CONTRACT tictactoe123 : public contract {
            }else{
                return 0;
            }
-           
-                       ;
        }
 
        /**
@@ -213,7 +224,9 @@ CONTRACT tictactoe123 : public contract {
         *        and  [LOW_BOUND_COL,HIGH_BOUND_COL] ranges
         */
        uint8_t get_winner_value_by_column(const uint8_t column,std::vector<uint8_t> board){
-           if(board[get_position(1,column)]==board[get_position(2,column)]==board[get_position(3,column)]){
+           if(board[get_position(1,column)] &&
+               board[get_position(1,column)] == board[get_position(2,column)] &&
+               board[get_position(2,column)] == board[get_position(3,column)] ){
               return board[get_position(1,column)];  
            }else{
                return 0;
@@ -263,5 +276,4 @@ CONTRACT tictactoe123 : public contract {
             }
         }
 
-   
 };

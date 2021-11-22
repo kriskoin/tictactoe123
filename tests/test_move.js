@@ -37,7 +37,9 @@ const LOW_BOUND_COL = 1;
 const HIGH_BOUND_COL = 3;
 
 describe ('tictactoe test move action auth & range check\n', function(){
+    
     it("cleaning games' table",async () => {
+        this.retries(15);
         try {
             const result = await api.transact({
                 actions: [{
@@ -63,6 +65,7 @@ describe ('tictactoe test move action auth & range check\n', function(){
 
   it("test move with unauthorized account",async () => {
     try {
+        this.retries(15);
         const result = await api.transact({
             actions: [{
               account: contract_name,
@@ -92,6 +95,7 @@ describe ('tictactoe test move action auth & range check\n', function(){
 
   it("test move with unauthorized by",async () => {
     try {
+        this.retries(15);
         const result = await api.transact({
             actions: [{
               account: contract_name,
@@ -121,6 +125,7 @@ describe ('tictactoe test move action auth & range check\n', function(){
 
   it("test move action with dup host name ",async () => {
     try {
+        this.retries(15);
         const result = await api.transact({
             actions: [{
               account: contract_name,
@@ -150,6 +155,7 @@ describe ('tictactoe test move action auth & range check\n', function(){
 
   it("test move action with invalid row (low)",async () => {
     try {
+        this.retries(15);
         const result = await api.transact({
             actions: [{
               account: contract_name,
@@ -179,6 +185,7 @@ describe ('tictactoe test move action auth & range check\n', function(){
 
   it("test move action with invalid row (high)",async () => {
     try {
+        this.retries(15);
         const result = await api.transact({
             actions: [{
               account: contract_name,
@@ -209,6 +216,7 @@ describe ('tictactoe test move action auth & range check\n', function(){
   
   it("test move action with invalid column (low)",async () => {
     try {
+        this.retries(15);
         const result = await api.transact({
             actions: [{
               account: contract_name,
@@ -238,6 +246,7 @@ describe ('tictactoe test move action auth & range check\n', function(){
 
   it("test move action with invalid column (high)",async () => {
     try {
+        this.retries(15);
         const result = await api.transact({
             actions: [{
               account: contract_name,
@@ -267,6 +276,7 @@ describe ('tictactoe test move action auth & range check\n', function(){
 
   it("test move action with invalid game",async () => {
     try {
+        this.retries(15);
         const result = await api.transact({
             actions: [{
               account: contract_name,
@@ -298,8 +308,9 @@ describe ('tictactoe test move action auth & range check\n', function(){
 
 
 describe ('tictactoe test move action invalid turn logic \n', function(){
-
+    
     it("cleaning games' table",async () => {
+      this.retries(15);
       try {
           const result = await api.transact({
               actions: [{
@@ -322,6 +333,7 @@ describe ('tictactoe test move action invalid turn logic \n', function(){
   });
 
     it("create game",async () => {
+        this.retries(15);
         try {
             const result = await api.transact({
                 actions: [{
@@ -346,6 +358,7 @@ describe ('tictactoe test move action invalid turn logic \n', function(){
      });    
 
     it("test move action with invalid turn",async () => {
+        this.retries(15);
         try {
             const result = await api.transact({
                 actions: [{
@@ -375,6 +388,7 @@ describe ('tictactoe test move action invalid turn logic \n', function(){
       });
 
       it("test move action with valid turn",async () => {
+        this.retries(15);
         try {
             const result = await api.transact({
                 actions: [{
@@ -402,6 +416,7 @@ describe ('tictactoe test move action invalid turn logic \n', function(){
       });
 
       it(" close game",async () => {
+        this.retries(15);
         try {
             const result = await api.transact({
                 actions: [{
@@ -429,8 +444,8 @@ describe ('tictactoe test move action invalid turn logic \n', function(){
  
 
 describe ('tictactoe test move action with invalid (used) position \n', function(){
-    
     it("cleaning games' table",async () => {
+        this.retries(15);
         try {
             const result = await api.transact({
                 actions: [{
@@ -453,6 +468,7 @@ describe ('tictactoe test move action with invalid (used) position \n', function
     });
 
     it("create game",async () => {
+        this.retries(15);
         try {
             const result = await api.transact({
                 actions: [{
@@ -479,6 +495,7 @@ describe ('tictactoe test move action with invalid (used) position \n', function
  
 
       it("test move challenger marks [1,1]",async () => {
+        this.retries(15);
         try {
             const result = await api.transact({
                 actions: [{
@@ -506,6 +523,7 @@ describe ('tictactoe test move action with invalid (used) position \n', function
       });
 
       it("test move challenger marks [1,2] with wrong turn",async () => {
+        this.retries(15);
         try {
             const result = await api.transact({
                 actions: [{
@@ -535,6 +553,7 @@ describe ('tictactoe test move action with invalid (used) position \n', function
       });
 
       it("test move host marks [3,3]",async () => {
+        this.retries(15);
         try {
             const result = await api.transact({
                 actions: [{
@@ -562,6 +581,7 @@ describe ('tictactoe test move action with invalid (used) position \n', function
       });
 
       it("test move challenger marks [3,3] position already used",async () => {
+        this.retries(15);
         try {
             const result = await api.transact({
                 actions: [{
@@ -591,6 +611,7 @@ describe ('tictactoe test move action with invalid (used) position \n', function
       });
 
       it("test move challenger marks [2,2]",async () => {
+        this.retries(15);
         try {
             const result = await api.transact({
                 actions: [{
@@ -618,6 +639,7 @@ describe ('tictactoe test move action with invalid (used) position \n', function
       });
 
       it("test move host marks [3,1]",async () => {
+        this.retries(15);
         try {
             const result = await api.transact({
                 actions: [{
@@ -645,6 +667,7 @@ describe ('tictactoe test move action with invalid (used) position \n', function
       });
 
       it("test move challenger marks [1,3]",async () => {
+        this.retries(15);
         try {
             const result = await api.transact({
                 actions: [{
@@ -672,6 +695,7 @@ describe ('tictactoe test move action with invalid (used) position \n', function
       });
 
       it("test move host marks [2,2] position already used",async () => {
+        this.retries(15);
         try {
             const result = await api.transact({
                 actions: [{
@@ -701,6 +725,7 @@ describe ('tictactoe test move action with invalid (used) position \n', function
       });
 
       it("test move host marks [3,1] position already used",async () => {
+        this.retries(15);
         try {
             const result = await api.transact({
                 actions: [{
@@ -730,6 +755,7 @@ describe ('tictactoe test move action with invalid (used) position \n', function
       });
 
       it("test move host marks [3,1] position already used",async () => {
+        this.retries(15);
         try {
             const result = await api.transact({
                 actions: [{
@@ -760,6 +786,7 @@ describe ('tictactoe test move action with invalid (used) position \n', function
 
 
       it(" close game",async () => {
+        this.retries(15);
         try {
             const result = await api.transact({
                 actions: [{

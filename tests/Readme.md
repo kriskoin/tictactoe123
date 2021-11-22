@@ -20,11 +20,12 @@ yarn add eosjs
 
 yarn install
 
-2) Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the blockchain, theres a script to create those. ```yarn createacc```
+2) Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the blockchain, theres a script to create those. ```mocha create_test_accts.js```
 
 ## How to Run tests
 
-```yarn createacc``` to create tests accounts
-```yarn testcreate``` to test create and close  actions
-```yarn testmove``` to test move action
-```yarn testwinner``` to test winner logic
+```mocha create_test_accts.js``` to create tests accounts
+```mocha test_create_close.js``` to test create and close  actions
+```mocha test_move.js``` to test move action
+```mocha test_winner.js``` to test winner logic
+```mocha test_tie.js``` to test tie logic

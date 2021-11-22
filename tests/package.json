@@ -10,7 +10,8 @@
     "createacc": "mocha --timeout 1800 create_test_accts.js",
     "testcreate": "mocha --timeout 18000 test_create_close.js",
     "testmove": "mocha --timeout 18000 test_move.js",
-    "testwinner": "mocha --timeout 18000 test_winner.js"
+    "testwinner": "mocha --timeout 18000 test_winner.js",
+    "testtie": "mocha --timeout 18000 test_tie.js"
   },
   "dependencies": {
     "chai": "^4.2.0",
