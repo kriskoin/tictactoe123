@@ -30,6 +30,15 @@ const rpc = new JsonRpc('http://localhost:8888', { fetch });
 const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 const get = require('lodash.get')
 var chai = require('chai'),assert = chai.assert;
+/**
+ * https://www.testim.io/blog/testing-promises-using-mocha/
+ * 
+ * beforeEach(function (done) {
+    setTimeout(function(){
+      done();
+    }, 500);
+  });
+ */
 
 describe ('tictactoe tests dup game\n', function(){
 
