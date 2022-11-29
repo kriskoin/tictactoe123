@@ -24,7 +24,8 @@ yarn install
 
 ## How to Run tests
 
-` mocha create_test_accts.js ` to create tests accounts
+```mocha create_test_accts.js``` to create tests accounts
+
 ` mocha test_create_close.js ` to test create and close  actions
 ` mocha test_move.js ` to test move action
 ` mocha test_winner.js ` to test winner logic
