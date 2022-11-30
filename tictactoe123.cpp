@@ -1,4 +1,8 @@
 #include <eosio/eosio.hpp>
+#include <ctime>     // std::time
+#include <eosio/time.hpp>
+
+#include <eosio/system.hpp>
 
 #define LOW_BOUND_ROW 1
 #define HIGH_BOUND_ROW 3
@@ -11,6 +15,7 @@
 using namespace eosio;
 CONTRACT tictactoe123 : public contract {
     public:
+     const static uint32_t MINUTE = 60;
         using contract::contract;
         TABLE game {
             uint128_t id;
@@ -18,6 +23,7 @@ CONTRACT tictactoe123 : public contract {
             name host;
             name turn = eosio::name("none");
             name winner = eosio::name("none");
+            eosio::time_point_sec turn_deadline;
             std::vector<uint8_t> board = {0,0,0,0,0,0,0,0,0};
             uint8_t marks = 0;
             
@@ -27,6 +33,7 @@ CONTRACT tictactoe123 : public contract {
                 turn = challenger;
                 winner = eosio::name("none");
                 marks = 0;
+                turn_deadline = eosio::current_time_point();
             }
             uint128_t primary_key() const { return id; }
             uint64_t  by_challenger() const { return challenger.value; }
@@ -77,6 +84,7 @@ CONTRACT tictactoe123 : public contract {
                     row.challenger = challenger;
                     row.host = host;  
                     row.turn = challenger;
+                    row.turn_deadline = eosio::current_time_point();
                 });
             }
             
@@ -103,7 +111,8 @@ CONTRACT tictactoe123 : public contract {
 
             check((itr->winner == eosio::name("none") && itr->marks != 9),"game is over, tie detected");
 
-            check(itr->turn == by ,"is not your turn");
+           // check((itr->turn == by) && (itr->turn_deadline<eosio::time_point_sec()) ,"is not your turn");
+           check( (itr->turn_deadline<eosio::time_point_sec()) ,"is not your turn");
 
             uint8_t board_position = get_position(row,column);
             check (is_empy_cell(board_position,itr->board),"This position is already used");
@@ -125,6 +134,7 @@ CONTRACT tictactoe123 : public contract {
                 g.board[board_position] = player_mark;
                 g.turn = next_turn;
                 g.marks++;
+                g.turn_deadline = eosio::current_time_point();
                 if( 4 <= g.marks){
                    g.winner = get_winner(g);
                 }
