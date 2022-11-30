@@ -37,6 +37,21 @@ CONTRACT tictactoe123 : public contract {
        eosio::indexed_by<name("idxchall"), eosio::const_mem_fun<game, uint64_t, &game::by_challenger>>
       > games_table;
 
+      TABLE leaderboard
+        {
+            uint32_t id;
+            name player;
+            uint32_t win = 0;
+            uint32_t lost = 0;
+            uint32_t primary_key() const { return id; }
+            uint64_t by_player() const { return player.value; }
+            EOSLIB_SERIALIZE( leaderboard, (id)(player)(win)(lost))
+        };
+        typedef eosio::multi_index<name("leaderboards"), leaderboard,
+       eosio::indexed_by<name("idxplayer"), eosio::const_mem_fun<leaderboard, uint64_t, &leaderboard::by_player>>
+      > leaderboard_table;
+        
+
         ACTION welcome(name host , name opponent){
             require_auth(get_self());
             print ("Hola amigos");
@@ -173,10 +188,14 @@ CONTRACT tictactoe123 : public contract {
            
            if ( winner_value == HOST_MARK  ){
                winner_name = currentGame.host;
+               update_leaderboard(currentGame.host,1,0);
+               update_leaderboard(currentGame.challenger,0,1);
            };
 
            if ( winner_value == CHALLENGER_MARK ){
                winner_name = currentGame.challenger;
+               update_leaderboard(currentGame.challenger,1,0);
+               update_leaderboard(currentGame.host,0,1);
            }
            
           return winner_name;
@@ -308,6 +327,26 @@ CONTRACT tictactoe123 : public contract {
             games.modify(itr, itr->host, [](auto &g) {
                 g.reset_game();
             });
+        }
+
+        void update_leaderboard(name player,uint32_t win ,uint32_t lost ){
+            leaderboard_table leaders(get_self(),get_self().value);
+            auto idx_players = leaders.get_index<name("idxplayer")>();
+            auto player_record = idx_players.find(player.value);
+            if ( player_record == idx_players.end()){
+                 leaders.emplace(get_self(), [&]( auto& row ) {
+                    row.id = leaders.available_primary_key();;
+                    row.player = player;
+                    row.win = win;  
+                    row.lost = lost;
+                });
+            }else{
+                idx_players.modify(player_record, get_self(), [&](auto &row) {
+                    row.win = row.win + win;
+                    row.lost = row.lost + lost;
+                    });
+            }
+            
         }
 
 };
