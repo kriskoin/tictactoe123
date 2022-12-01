@@ -1,5 +1,6 @@
 #include <eosio/eosio.hpp>
 #include <ctime>     // std::time
+#include <chrono>
 #include <eosio/time.hpp>
 
 #include <eosio/system.hpp>
@@ -23,7 +24,7 @@ CONTRACT tictactoe123 : public contract {
             name host;
             name turn = eosio::name("none");
             name winner = eosio::name("none");
-            eosio::time_point_sec turn_deadline;
+            uint32_t turn_deadline;
             std::vector<uint8_t> board = {0,0,0,0,0,0,0,0,0};
             uint8_t marks = 0;
             
@@ -33,11 +34,12 @@ CONTRACT tictactoe123 : public contract {
                 turn = challenger;
                 winner = eosio::name("none");
                 marks = 0;
-                turn_deadline = eosio::current_time_point();
+                eosio::time_point_sec tps = eosio::current_time_point();
+                turn_deadline = tps.sec_since_epoch()+MINUTE;
             }
             uint128_t primary_key() const { return id; }
             uint64_t  by_challenger() const { return challenger.value; }
-            EOSLIB_SERIALIZE( game, (id)(challenger)(host)(turn)(winner)(board)(marks))
+            EOSLIB_SERIALIZE( game, (id)(challenger)(host)(turn)(turn_deadline)(winner)(board)(marks))
         };
 
       typedef eosio::multi_index<name("games"), game,
@@ -61,7 +63,7 @@ CONTRACT tictactoe123 : public contract {
 
         ACTION welcome(name host , name opponent){
             require_auth(get_self());
-            print ("Hola amigos");
+            print("EOS");
         }
 
         ACTION create( name host, name challenger ){
@@ -84,7 +86,8 @@ CONTRACT tictactoe123 : public contract {
                     row.challenger = challenger;
                     row.host = host;  
                     row.turn = challenger;
-                    row.turn_deadline = eosio::current_time_point();
+                    eosio::time_point_sec tps = eosio::current_time_point();
+                    row.turn_deadline = tps.sec_since_epoch()+MINUTE;
                 });
             }
             
@@ -110,10 +113,10 @@ CONTRACT tictactoe123 : public contract {
             check(itr->winner == eosio::name("none") ,"game is over, winner detected"); 
 
             check((itr->winner == eosio::name("none") && itr->marks != 9),"game is over, tie detected");
-
-           // check((itr->turn == by) && (itr->turn_deadline<eosio::time_point_sec()) ,"is not your turn");
-           check( (itr->turn_deadline<eosio::time_point_sec()) ,"is not your turn");
-
+            eosio::time_point_sec tps = eosio::current_time_point();
+              
+            check((itr->turn == by) || (itr->turn_deadline<tps.sec_since_epoch()) ,"is not your turn");
+         
             uint8_t board_position = get_position(row,column);
             check (is_empy_cell(board_position,itr->board),"This position is already used");
 
@@ -134,7 +137,9 @@ CONTRACT tictactoe123 : public contract {
                 g.board[board_position] = player_mark;
                 g.turn = next_turn;
                 g.marks++;
-                g.turn_deadline = eosio::current_time_point();
+                eosio::time_point_sec tps = eosio::current_time_point();
+                g.turn_deadline = tps.sec_since_epoch()+MINUTE;
+                //g.turn_deadline = current_time_point_sec ();
                 if( 4 <= g.marks){
                    g.winner = get_winner(g);
                 }
@@ -322,17 +327,6 @@ CONTRACT tictactoe123 : public contract {
             uint128_t tmp_key = uint128_t{host.value} << 64 | challenger.value;
             auto itr = games.find( tmp_key);
             check(itr != games.end(),"Game does not exists");
-            /*
-            check(has_auth(by), "Only " + by.to_string() + "can restart the game.");
-
-            // Check if game exists
-            games existingHostGames(get_self(), host.value);
-            auto itr = existingHostGames.find(challenger.value);
-            check(itr != existingHostGames.end(), "Game does not exist.");
-
-            // Check if this game belongs to the action sender
-            check(by == itr->host || by == itr->challenger, "This is not your game.");
-            */
             // Reset game
             games.modify(itr, itr->host, [](auto &g) {
                 g.reset_game();
