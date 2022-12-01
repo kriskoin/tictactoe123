@@ -1,4 +1,9 @@
 #include <eosio/eosio.hpp>
+#include <ctime>     // std::time
+#include <chrono>
+#include <eosio/time.hpp>
+
+#include <eosio/system.hpp>
 
 #define LOW_BOUND_ROW 1
 #define HIGH_BOUND_ROW 3
@@ -11,6 +16,7 @@
 using namespace eosio;
 CONTRACT tictactoe123 : public contract {
     public:
+     const static uint32_t MINUTE = 60;
         using contract::contract;
         TABLE game {
             uint128_t id;
@@ -18,6 +24,7 @@ CONTRACT tictactoe123 : public contract {
             name host;
             name turn = eosio::name("none");
             name winner = eosio::name("none");
+            uint32_t turn_deadline;
             std::vector<uint8_t> board = {0,0,0,0,0,0,0,0,0};
             uint8_t marks = 0;
             
@@ -27,19 +34,36 @@ CONTRACT tictactoe123 : public contract {
                 turn = challenger;
                 winner = eosio::name("none");
                 marks = 0;
+                eosio::time_point_sec tps = eosio::current_time_point();
+                turn_deadline = tps.sec_since_epoch()+MINUTE;
             }
             uint128_t primary_key() const { return id; }
             uint64_t  by_challenger() const { return challenger.value; }
-            EOSLIB_SERIALIZE( game, (id)(challenger)(host)(turn)(winner)(board)(marks))
+            EOSLIB_SERIALIZE( game, (id)(challenger)(host)(turn)(turn_deadline)(winner)(board)(marks))
         };
 
       typedef eosio::multi_index<name("games"), game,
        eosio::indexed_by<name("idxchall"), eosio::const_mem_fun<game, uint64_t, &game::by_challenger>>
       > games_table;
 
+      TABLE leaderboard
+        {
+            uint32_t id;
+            name player;
+            uint32_t win = 0;
+            uint32_t lost = 0;
+            uint32_t primary_key() const { return id; }
+            uint64_t by_player() const { return player.value; }
+            EOSLIB_SERIALIZE( leaderboard, (id)(player)(win)(lost))
+        };
+        typedef eosio::multi_index<name("leaderboards"), leaderboard,
+       eosio::indexed_by<name("idxplayer"), eosio::const_mem_fun<leaderboard, uint64_t, &leaderboard::by_player>>
+      > leaderboard_table;
+        
+
         ACTION welcome(name host , name opponent){
             require_auth(get_self());
-            print ("Hola amigos");
+            print("EOS");
         }
 
         ACTION create( name host, name challenger ){
@@ -62,6 +86,8 @@ CONTRACT tictactoe123 : public contract {
                     row.challenger = challenger;
                     row.host = host;  
                     row.turn = challenger;
+                    eosio::time_point_sec tps = eosio::current_time_point();
+                    row.turn_deadline = tps.sec_since_epoch()+MINUTE;
                 });
             }
             
@@ -87,9 +113,10 @@ CONTRACT tictactoe123 : public contract {
             check(itr->winner == eosio::name("none") ,"game is over, winner detected"); 
 
             check((itr->winner == eosio::name("none") && itr->marks != 9),"game is over, tie detected");
-
-            check(itr->turn == by ,"is not your turn");
-
+            eosio::time_point_sec tps = eosio::current_time_point();
+              
+            check((itr->turn == by) || (itr->turn_deadline<tps.sec_since_epoch()) ,"is not your turn");
+         
             uint8_t board_position = get_position(row,column);
             check (is_empy_cell(board_position,itr->board),"This position is already used");
 
@@ -110,6 +137,9 @@ CONTRACT tictactoe123 : public contract {
                 g.board[board_position] = player_mark;
                 g.turn = next_turn;
                 g.marks++;
+                eosio::time_point_sec tps = eosio::current_time_point();
+                g.turn_deadline = tps.sec_since_epoch()+MINUTE;
+                //g.turn_deadline = current_time_point_sec ();
                 if( 4 <= g.marks){
                    g.winner = get_winner(g);
                 }
@@ -173,10 +203,14 @@ CONTRACT tictactoe123 : public contract {
            
            if ( winner_value == HOST_MARK  ){
                winner_name = currentGame.host;
+               update_leaderboard(currentGame.host,1,0);
+               update_leaderboard(currentGame.challenger,0,1);
            };
 
            if ( winner_value == CHALLENGER_MARK ){
                winner_name = currentGame.challenger;
+               update_leaderboard(currentGame.challenger,1,0);
+               update_leaderboard(currentGame.host,0,1);
            }
            
           return winner_name;
@@ -293,21 +327,30 @@ CONTRACT tictactoe123 : public contract {
             uint128_t tmp_key = uint128_t{host.value} << 64 | challenger.value;
             auto itr = games.find( tmp_key);
             check(itr != games.end(),"Game does not exists");
-            /*
-            check(has_auth(by), "Only " + by.to_string() + "can restart the game.");
-
-            // Check if game exists
-            games existingHostGames(get_self(), host.value);
-            auto itr = existingHostGames.find(challenger.value);
-            check(itr != existingHostGames.end(), "Game does not exist.");
-
-            // Check if this game belongs to the action sender
-            check(by == itr->host || by == itr->challenger, "This is not your game.");
-            */
             // Reset game
             games.modify(itr, itr->host, [](auto &g) {
                 g.reset_game();
             });
+        }
+
+        void update_leaderboard(name player,uint32_t win ,uint32_t lost ){
+            leaderboard_table leaders(get_self(),get_self().value);
+            auto idx_players = leaders.get_index<name("idxplayer")>();
+            auto player_record = idx_players.find(player.value);
+            if ( player_record == idx_players.end()){
+                 leaders.emplace(get_self(), [&]( auto& row ) {
+                    row.id = leaders.available_primary_key();;
+                    row.player = player;
+                    row.win = win;  
+                    row.lost = lost;
+                });
+            }else{
+                idx_players.modify(player_record, get_self(), [&](auto &row) {
+                    row.win = row.win + win;
+                    row.lost = row.lost + lost;
+                    });
+            }
+            
         }
 
 };
