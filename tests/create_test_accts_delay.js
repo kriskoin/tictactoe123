@@ -78,7 +78,7 @@ describe ('tictactoe creating tests accounts \n', function(){
     } catch (err) {
       console.log('\nCaught exception: ' + err);
     }
-    setTimeout(() => {}, 25000);
+   
   });
 
   it("create test account: host_1 \n", async () => {
@@ -128,10 +128,10 @@ describe ('tictactoe creating tests accounts \n', function(){
     } catch (err) {
       console.log('\nCaught exception: ' + err);
     }
-    setTimeout(() => {}, 25000);
+    
   });
 
-  it("create test account: chagenller_1 \n", async () => {
+  it.skip("create test account: chagenller_1 \n", async () => {
     try {
       const result = await api.transact(
         {
@@ -178,8 +178,62 @@ describe ('tictactoe creating tests accounts \n', function(){
     } catch (err) {
       console.log('\nCaught exception: ' + err);
     }
-    setTimeout(() => {}, 25000);
+    
   });
+
+  it("create test account: challenger_1 \n", async () => {
+    return new Promise((resolve, reject) => {
+        try {
+            const result = api.transact(
+                {
+                    actions: [
+                        {
+                            account: "eosio",
+                            name: "newaccount",
+                            authorization: [
+                                {
+                                    actor: "eosio",
+                                    permission: "active",
+                                },
+                            ],
+                            data: {
+                                creator: 'eosio',
+                                name: challenger_1,
+                                owner: {
+                                    threshold: 1,
+                                    keys: [{
+                                        key: acct_pub_key,
+                                        weight: 1
+                                    }],
+                                    accounts: [],
+                                    waits: []
+                                },
+                                active: {
+                                    threshold: 1,
+                                    keys: [{
+                                        key: acct_pub_key,
+                                        weight: 1
+                                    }],
+                                    accounts: [],
+                                    waits: []
+                                },
+                            },//
+                        },
+                    ],
+                },
+                {
+                    blocksBehind: 3,
+                    expireSeconds: 30,
+                }
+            );
+            resolve(result);
+        } catch (err) {
+            console.log('\nCaught exception: ' + err);
+            reject(err);
+        }
+    });
+});
+
 
 
 });
