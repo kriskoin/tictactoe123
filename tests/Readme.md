@@ -3,22 +3,52 @@
 The follow tests were design to test the smart contract's actions. test are
 build to run on ubuntu 18
 
-## Prerequisites node.js
+## Enviroment
+Ubuntu 20.04.5 LTS
+x86_64 GNU/Linux
+node v10.19.0
+yarn 1.22.19
+
+### test environment
+chai": "^4.2.0",
+    "eosjs": "^22.1.0",
+    "lodash": "^4.17.15",
+    "lodash.get": "^4.4.2",
+    "lodash.isequal": "^4.5.0",
+    "mocha": "^7.0.1",
+    "node-fetch": "^2.6.0"
+
+## Prerequisites node.js 
 1) in case you don have  Node.js installed on your system, install the Nodejs package by typing:
 
 If Node.js is not installed on your system, install the Node.js package by typing:
 $ sudo dnf install @nodejs
 
-Enable the Yarn repository and import the repository’s GPG key:
-$ curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo
+## install yarn:
+ref:
+https://linuxize.com/post/how-to-install-yarn-on-ubuntu-18-04/
 
-$ sudo rpm --import https://dl.yarnpkg.com/rpm/pubkey.gpg
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 
-Once the repository is enabled, install Yarn:
-$ sudo dnf install yarn
+sudo apt update
+sudo apt install --no-install-recommends yarn
+
+
+
+## setup our tests
+### change to test's directory
+cd tictactoe123/test
+
+### Install eosjs
 yarn add eosjs
 
-yarn install
+### setup test requeriments
+run the command 'yarn install' within the test directory
+tictactoe123/test
+
+yarn install 
+
 
 2) Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the blockchain, theres a script to create those. ```mocha create_test_accts.js```
 
