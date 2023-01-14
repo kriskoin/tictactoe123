@@ -28,33 +28,33 @@ $ sudo dnf install @nodejs
 ref:
 https://linuxize.com/post/how-to-install-yarn-on-ubuntu-18-04/
 
-curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+`curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - `
+` echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list `
 
-sudo apt update
-sudo apt install --no-install-recommends yarn
+`sudo apt update `
+`sudo apt install --no-install-recommends yarn`
 
 
 
 ## setup our tests
 ### change to test's directory
-cd tictactoe123/test
+`cd tictactoe123/test`
 
 ### Install eosjs
-yarn add eosjs
+`yarn add eosjs`
 
 ### setup test requeriments
 run the command 'yarn install' within the test directory
-tictactoe123/test
+`tictactoe123/test`
 
-yarn install 
+`yarn install `
 
-
-2) Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the blockchain, theres a script to create those. ```mocha create_test_accts.js```
+## Setup smart contract accounts
+Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the blockchain, theres a script to create those. `mocha create_test_accts.js`
 
 ## How to Run tests
 
-```mocha create_test_accts.js``` to create tests accounts
+`mocha create_test_accts.js` to create tests accounts
 
 ` mocha test_create_close.js ` to test create and close  actions
 ` mocha test_move.js ` to test move action
