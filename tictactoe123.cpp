@@ -2,7 +2,7 @@
 #include <ctime>     // std::time
 #include <chrono>
 #include <eosio/time.hpp>
-
+#include <eosio/singleton.hpp>
 #include <eosio/system.hpp>
 
 #define LOW_BOUND_ROW 1
@@ -13,33 +13,51 @@
 #define HOST_MARK 1
 #define CHALLENGER_MARK 2
 
+#define STAKE_AMOUNT 5 //5 game tokens
+
 using namespace eosio;
 CONTRACT tictactoe123 : public contract {
+
+     TABLE game_settings {
+        std::string token_sym;
+        uint8_t stake_amount;
+    } default_game_settings;
+
+    using singleton_settings = eosio::singleton<"gamesettings"_n,game_settings> ;
+
     public:
      const static uint32_t MINUTE = 60;
         using contract::contract;
+
+         tictactoe123(
+            eosio::name receiver,
+            eosio::name code,
+            datastream < const char *> ds
+        ):
+        contract(receiver,code,ds),
+        game_settings_instance(receiver,receiver.value)
+        {}
+
+        singleton_settings game_settings_instance;
+
         TABLE game {
             uint128_t id;
             name challenger;
             name host;
             name turn = eosio::name("none");
             name winner = eosio::name("none");
-            uint32_t turn_deadline;
             std::vector<uint8_t> board = {0,0,0,0,0,0,0,0,0};
             uint8_t marks = 0;
-            
             // Reset game
             void reset_game(){
                 board.assign(HIGH_BOUND_COL * HIGH_BOUND_ROW, 0);
                 turn = challenger;
                 winner = eosio::name("none");
                 marks = 0;
-                eosio::time_point_sec tps = eosio::current_time_point();
-                turn_deadline = tps.sec_since_epoch()+MINUTE;
             }
             uint128_t primary_key() const { return id; }
             uint64_t  by_challenger() const { return challenger.value; }
-            EOSLIB_SERIALIZE( game, (id)(challenger)(host)(turn)(turn_deadline)(winner)(board)(marks))
+            EOSLIB_SERIALIZE( game, (id)(challenger)(host)(turn)(winner)(board)(marks))
         };
 
       typedef eosio::multi_index<name("games"), game,
@@ -86,8 +104,6 @@ CONTRACT tictactoe123 : public contract {
                     row.challenger = challenger;
                     row.host = host;  
                     row.turn = challenger;
-                    eosio::time_point_sec tps = eosio::current_time_point();
-                    row.turn_deadline = tps.sec_since_epoch()+MINUTE;
                 });
             }
             
@@ -113,9 +129,6 @@ CONTRACT tictactoe123 : public contract {
             check(itr->winner == eosio::name("none") ,"game is over, winner detected"); 
 
             check((itr->winner == eosio::name("none") && itr->marks != 9),"game is over, tie detected");
-            eosio::time_point_sec tps = eosio::current_time_point();
-              
-            check((itr->turn == by) || (itr->turn_deadline<tps.sec_since_epoch()) ,"is not your turn");
          
             uint8_t board_position = get_position(row,column);
             check (is_empy_cell(board_position,itr->board),"This position is already used");
@@ -137,9 +150,6 @@ CONTRACT tictactoe123 : public contract {
                 g.board[board_position] = player_mark;
                 g.turn = next_turn;
                 g.marks++;
-                eosio::time_point_sec tps = eosio::current_time_point();
-                g.turn_deadline = tps.sec_since_epoch()+MINUTE;
-                //g.turn_deadline = current_time_point_sec ();
                 if( 4 <= g.marks){
                    g.winner = get_winner(g);
                 }

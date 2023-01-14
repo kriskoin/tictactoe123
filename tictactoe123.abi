@@ -1,18 +1,23 @@
 {
     "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
-    "version": "eosio::abi/1.1",
+    "version": "eosio::abi/1.2",
     "types": [],
     "structs": [
+        {
+            "name": "clear",
+            "base": "",
+            "fields": []
+        },
         {
             "name": "close",
             "base": "",
             "fields": [
                 {
-                    "name": "challenger",
+                    "name": "host",
                     "type": "name"
                 },
                 {
-                    "name": "host",
+                    "name": "challenger",
                     "type": "name"
                 }
             ]
@@ -22,11 +27,11 @@
             "base": "",
             "fields": [
                 {
-                    "name": "challenger",
+                    "name": "host",
                     "type": "name"
                 },
                 {
-                    "name": "host",
+                    "name": "challenger",
                     "type": "name"
                 }
             ]
@@ -45,6 +50,102 @@
                 },
                 {
                     "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "turn",
+                    "type": "name"
+                },
+                {
+                    "name": "winner",
+                    "type": "name"
+                },
+                {
+                    "name": "board",
+                    "type": "bytes"
+                },
+                {
+                    "name": "marks",
+                    "type": "uint8"
+                }
+            ]
+        },
+        {
+            "name": "game_settings",
+            "base": "",
+            "fields": [
+                {
+                    "name": "token_sym",
+                    "type": "string"
+                },
+                {
+                    "name": "stake_amount",
+                    "type": "uint8"
+                }
+            ]
+        },
+        {
+            "name": "leaderboard",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint32"
+                },
+                {
+                    "name": "player",
+                    "type": "name"
+                },
+                {
+                    "name": "win",
+                    "type": "uint32"
+                },
+                {
+                    "name": "lost",
+                    "type": "uint32"
+                }
+            ]
+        },
+        {
+            "name": "move",
+            "base": "",
+            "fields": [
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "challenger",
+                    "type": "name"
+                },
+                {
+                    "name": "by",
+                    "type": "name"
+                },
+                {
+                    "name": "row",
+                    "type": "uint8"
+                },
+                {
+                    "name": "column",
+                    "type": "uint8"
+                }
+            ]
+        },
+        {
+            "name": "restart",
+            "base": "",
+            "fields": [
+                {
+                    "name": "challenger",
+                    "type": "name"
+                },
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "by",
                     "type": "name"
                 }
             ]
@@ -66,51 +167,61 @@
     ],
     "actions": [
         {
+            "name": "clear",
+            "type": "clear",
+            "ricardian_contract": ""
+        },
+        {
             "name": "close",
             "type": "close",
-            "ricardian_contract": "---\r\nspec-version: 0.1.0\r\ntitle: close\r\nsummary: The intent of the `{{ close }}` action is close a game \r\nicon: https://favicon.ico"
+            "ricardian_contract": ""
         },
         {
             "name": "create",
             "type": "create",
-            "ricardian_contract": "---\r\nspec-version: 0.1.0\r\ntitle: create\r\nsummary: The intent of the `{{ create }}` action is create a game \r\nicon: https://favicon.ico"
+            "ricardian_contract": ""
+        },
+        {
+            "name": "move",
+            "type": "move",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "restart",
+            "type": "restart",
+            "ricardian_contract": ""
         },
         {
             "name": "welcome",
             "type": "welcome",
-            "ricardian_contract": "---\r\nspec-version: 0.1.0\r\ntitle: Welcome\r\nsummary: The intent of the `{{ welcome }}` action is welcome a player\r\nicon: https://favicon.ico"
+            "ricardian_contract": ""
         }
     ],
     "tables": [
+        {
+            "name": "game_settings",
+            "type": "game_settings",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
         {
             "name": "games",
             "type": "game",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
+        },
+        {
+            "name": "leaderboards",
+            "type": "leaderboard",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
         }
     ],
-    "ricardian_clauses": [
-        {
-            "id": "Data Storage",
-            "body": "---\r\nspec-version: 0.1.0\r\ntitle: General Data Storage\r\nsummary: The  application values the security of personal data. We may process only minimal user data as much as it is necessary to maintain the  application running. We only receive and store any information you knowingly provide to us when you create an account, or fill using the app. When required, this information may include the following:\r\nPersonal details such as name.\r\nContact information, such as email addresses.\r\nAccount details, such as user name and password.\r\nGeolocation data of the mobile device, such as latitude and longitude.\r\nicon: https://favicon.ico"
-        },
-        {
-            "id": "Data Usage",
-            "body": "---\r\nspec-version: 0.1.0\r\ntitle: General Data Use\r\nsummary: This smart contract will process user data to keep the gGoods application running. Any of the information we collect from you may be used for these purposes:\r\n - Create and manage user accounts.\r\n - Run and operate the application.\r\nicon: https://favicon.ico"
-        },
-        {
-            "id": "Data Ownership",
-            "body": "---\r\nspec-version: 0.1.0\r\ntitle: Data Ownership\r\nsummary: The user of this smart contract verifies that the smart contract owns the data and that it can use the data in accordance with the terms defined in the Ricardian contract.\r\nYou can delete certain personal information you shared with the gGoods application. When you delete personal information, we may maintain a copy of the unrevised personal information in our records for the duration necessary to comply with our obligations to our affiliates and partners, and for the purposes described below. If you would like to delete your personal information or permanently delete your account, you can do so on your account's profile page in the gGoods application.\r\nWe will retain and use your personal information for the period necessary to comply with our legal obligations, resolve disputes, and enforce our agreements unless a more extended retention period is required or permitted by law. We may use any aggregated data derived from or incorporating your personal information after you update or delete it, but not in a manner that would identify you personally. Once the retention period expires, personal information shall be deleted. \r\nicon: https://favicon.ico"
-        },
-        {
-            "id": "Data Distribution",
-            "body": "---\r\nspec-version: 0.1.0\r\ntitle: Data Distribution\r\nsummary: The smart contract promises not actively to share or distribute the address data. The smart contract user understands that data stored in a multi-index table is not private and can be accessed by any user of the blockchain.\r\nicon: https://favicon.ico"
-        },
-        {
-            "id": "Data Future",
-            "body": "---\r\nspec-version: 0.1.0\r\ntitle: Data Future\r\nsummary: The smart contract promises to only use the data following the terms defined in the Ricardian contract, now and at all future dates. You may exercise certain rights regarding your information processed by us. In particular, you have the right to do the following: \r\nicon: https://favicon.ico"
-        }
-    ],
-    "variants": []
+    "kv_tables": {},
+    "ricardian_clauses": [],
+    "variants": [],
+    "action_results": []
 }
