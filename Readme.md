@@ -13,6 +13,26 @@ Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the 
 ## set permissions:
 ` cleos set account permission tictactoe123 active --add-code `
 
+## Compile contract
+
+` eosio-cpp -abigen tictactoe123.cpp -o tictactoe123.wasm `
+` eosio-cpp -abigen tictactoe123.cpp -o tictactoe123.wasm  -R ./ricardian `
+
+## publish contract
+
+` cleos set contract tictactoe123 . -p tictactoe123@active `
+#### remove contract
+` cleos set contract tictactoe123 . --clear -p tictactoe123@active `
+
+##  Game Logics Actions
+` cleos push action tictactoe123 create '{"host":"gamehost1111","challenger":"gamechallen1"}' -p gamehost1111@active `
+
+` cleos push action tictactoe123 move '{"host":"gamehost1111","challenger":"gamechallen1","by":"gamehost1111","row":1,"column":1}' -p gamehost1111@active `
+
+` cleos push action tictactoe123 move '{"host":"gamehost1111","challenger":"gamechallen1","by":"gamechallen1","row":3"column":1}' -p gamechallen1@active `
+
+` cleos push action tictactoe123 close '{"host":"gamehost1111","challenger":"gamechallen1"}' -p gamehost1111@active `
+
 ## Set TICTAC token
 
 ` `
@@ -39,3 +59,4 @@ Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the 
 ` cleos get currency balance eosio.token  gamechallen1  TICTAC `
 ` cleos get currency balance eosio.token  gamehost2222  TICTAC `
 ` cleos get currency balance eosio.token  gamechallen2  TICTAC `
+` cleos get currency balance eosio.token  tictactoe123  TICTAC  `
