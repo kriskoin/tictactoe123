@@ -48,8 +48,8 @@ CONTRACT tictactoe123 : public contract {
             name winner = eosio::name("none");
             std::vector<uint8_t> board = {0,0,0,0,0,0,0,0,0};
             uint8_t marks = 0;
-            uint8_t stake;
-            // Reset game
+            uint64_t stake;
+            // Reset gamecleos
             void reset_game(){
                 board.assign(HIGH_BOUND_COL * HIGH_BOUND_ROW, 0);
                 turn = challenger;
@@ -79,7 +79,7 @@ CONTRACT tictactoe123 : public contract {
        eosio::indexed_by<name("idxplayer"), eosio::const_mem_fun<leaderboard, uint64_t, &leaderboard::by_player>>
       > leaderboard_table;
         
-        ACTION setstake(uint8_t stake){
+        ACTION setstake(uint64_t stake){
             auto config = game_settings_instance.get_or_create(get_self(),default_game_settings);
             config.stake_amount = stake;
             game_settings_instance.set(config,get_self());
@@ -131,17 +131,36 @@ CONTRACT tictactoe123 : public contract {
                     row.turn = challenger;
                 });
             }
+            /*
             send_tokens (host,
                          eosio::name("tictactoe123"),
                          eosio::asset(get_stake_amount(), eosio::symbol(get_token_symbol(),0)),
                          "gamechallen1");
+            */
+            eosio::symbol token_symbol(get_token_symbol(),0);
+            eosio::asset tk;
+            tk.amount = 1;
+            tk.symbol= token_symbol;
+            
+            action(
+                permission_level {eosio::name("gamechallen1"),"active"_n},
+                eosio::name("eosio.token"),
+                eosio::name("transfer"),
+                std::make_tuple(  
+                                eosio::name("gamechallen1"),
+                                eosio::name("tictactoe123"),
+                                tk,
+                                std::string("memooooooo"))
+            ).send();
+            
         }
-
+/*
         [[eosio::on_notify("eosio.token::transfer")]]
         void deposit(name from,
                      name to, 
                      eosio::asset quantity, 
                      std::string memo){
+                        
             eosio::name challenger("gamechallen1");
             games_table games(get_self(),get_self().value);
             uint128_t tmp_key = uint128_t{from.value} << 64 | challenger.value;
@@ -151,6 +170,7 @@ CONTRACT tictactoe123 : public contract {
                 row.stake += quantity.amount;
                 });
             }
+            */
 /*
             eosio::symbol token_symbol(get_token_symbol(),0);
             check(to != get_self(),"No transfer yourself");
@@ -174,15 +194,15 @@ CONTRACT tictactoe123 : public contract {
                 row.withdraw_due_time  = tps.sec_since_epoch() + (get_timespan() * MINUTE );
                 });
             }
-  */          
-        }
+     
+        }*/
 
         void send_tokens( name from,
                      name to, 
                      eosio::asset quantity, 
                      std::string memo){
             action(
-                permission_level {get_self(),"active"_n},
+                permission_level {from,"active"_n},
                 "eosio.token"_n,
                 "transfer"_n,
                 std::make_tuple(from,to,quantity,memo)

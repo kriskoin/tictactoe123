@@ -9,10 +9,12 @@ If the host calls the close action before the opponent accepts, or if the game e
 
 ## Setup smart contract accounts
 Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the blockchain, theres a script on tests folder  `mocha create_test_accts.js`
-
+##  create account
+` cleos create account eosio tictactoe123 EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV `
 ## set permissions:
 ` cleos set account permission tictactoe123 active --add-code `
-
+` cleos set account permission gamehost1111 active --add-code `
+` cleos set account permission gamechallen1 active --add-code `
 ## Compile contract
 
 ` eosio-cpp -abigen tictactoe123.cpp -o tictactoe123.wasm `
@@ -30,7 +32,7 @@ Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the 
 ` cleos push action tictactoe123 setsymbol '{"symbol":"TICTAC"}' -p tictactoe123@active `
 
 ### Set stake amount
-` cleos push action tictactoe123 setstake '{"stake":5}' -p tictactoe123@active `
+` cleos push action tictactoe123 setstake '{"stake":1}' -p tictactoe123@active `
 
 
 ##  Game Logic Actions
@@ -47,6 +49,9 @@ Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the 
 ` cleos get table tictactoe123 tictactoe123 games `\ 
 ` cleos get table tictactoe123 tictactoe123 leaderboards `\
 ` cleos get table tictactoe123 tictactoe123 gamesettings  ` Singleton\
+
+## clear contract Tables
+` cleos push action tictactoe123 clear '[]' -p tictactoe123@active `
 
 ## Set TICTAC token
 
