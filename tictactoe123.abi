@@ -67,11 +67,15 @@
                 {
                     "name": "marks",
                     "type": "uint8"
+                },
+                {
+                    "name": "stake",
+                    "type": "uint8"
                 }
             ]
         },
         {
-            "name": "game_settings",
+            "name": "gamesettings",
             "base": "",
             "fields": [
                 {
@@ -80,7 +84,7 @@
                 },
                 {
                     "name": "stake_amount",
-                    "type": "uint8"
+                    "type": "uint64"
                 }
             ]
         },
@@ -151,7 +155,27 @@
             ]
         },
         {
-            "name": "welcome",
+            "name": "setstake",
+            "base": "",
+            "fields": [
+                {
+                    "name": "stake",
+                    "type": "uint8"
+                }
+            ]
+        },
+        {
+            "name": "setsymbol",
+            "base": "",
+            "fields": [
+                {
+                    "name": "symbol",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "stake",
             "base": "",
             "fields": [
                 {
@@ -159,7 +183,11 @@
                     "type": "name"
                 },
                 {
-                    "name": "opponent",
+                    "name": "challenger",
+                    "type": "name"
+                },
+                {
+                    "name": "by",
                     "type": "name"
                 }
             ]
@@ -192,22 +220,32 @@
             "ricardian_contract": ""
         },
         {
-            "name": "welcome",
-            "type": "welcome",
+            "name": "setstake",
+            "type": "setstake",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setsymbol",
+            "type": "setsymbol",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "stake",
+            "type": "stake",
             "ricardian_contract": ""
         }
     ],
     "tables": [
         {
-            "name": "game_settings",
-            "type": "game_settings",
+            "name": "games",
+            "type": "game",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
         },
         {
-            "name": "games",
-            "type": "game",
+            "name": "gamesettings",
+            "type": "gamesettings",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

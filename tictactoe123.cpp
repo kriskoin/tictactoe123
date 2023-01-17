@@ -1,6 +1,7 @@
 #include <eosio/eosio.hpp>
 #include <ctime>     // std::time
 #include <chrono>
+#include <eosio/asset.hpp>
 #include <eosio/time.hpp>
 #include <eosio/singleton.hpp>
 #include <eosio/system.hpp>
@@ -13,17 +14,16 @@
 #define HOST_MARK 1
 #define CHALLENGER_MARK 2
 
-#define STAKE_AMOUNT 5 //5 game tokens
 
 using namespace eosio;
 CONTRACT tictactoe123 : public contract {
 
-     TABLE game_settings {
+     TABLE gamesettings {
         std::string token_sym;
-        uint8_t stake_amount;
+        uint64_t stake_amount;
     } default_game_settings;
 
-    using singleton_settings = eosio::singleton<"gamesettings"_n,game_settings> ;
+    using singleton_settings = eosio::singleton<"gamesettings"_n,gamesettings> ;
 
     public:
      const static uint32_t MINUTE = 60;
@@ -48,6 +48,7 @@ CONTRACT tictactoe123 : public contract {
             name winner = eosio::name("none");
             std::vector<uint8_t> board = {0,0,0,0,0,0,0,0,0};
             uint8_t marks = 0;
+            uint8_t stake;
             // Reset game
             void reset_game(){
                 board.assign(HIGH_BOUND_COL * HIGH_BOUND_ROW, 0);
@@ -57,7 +58,7 @@ CONTRACT tictactoe123 : public contract {
             }
             uint128_t primary_key() const { return id; }
             uint64_t  by_challenger() const { return challenger.value; }
-            EOSLIB_SERIALIZE( game, (id)(challenger)(host)(turn)(winner)(board)(marks))
+            EOSLIB_SERIALIZE( game, (id)(challenger)(host)(turn)(winner)(board)(marks)(stake))
         };
 
       typedef eosio::multi_index<name("games"), game,
@@ -78,11 +79,35 @@ CONTRACT tictactoe123 : public contract {
        eosio::indexed_by<name("idxplayer"), eosio::const_mem_fun<leaderboard, uint64_t, &leaderboard::by_player>>
       > leaderboard_table;
         
-
-        ACTION welcome(name host , name opponent){
-            require_auth(get_self());
-            print("EOS");
+        ACTION setstake(uint8_t stake){
+            auto config = game_settings_instance.get_or_create(get_self(),default_game_settings);
+            config.stake_amount = stake;
+            game_settings_instance.set(config,get_self());
+           
         }
+
+        ACTION setsymbol(std::string  symbol){
+            auto config = game_settings_instance.get_or_create(get_self(),default_game_settings);
+            config.token_sym = symbol;
+            game_settings_instance.set(config,get_self());
+           
+        }
+
+        uint64_t get_stake_amount (){
+            if( game_settings_instance.exists()){
+                return game_settings_instance.get().stake_amount;
+            }else{
+                return 0;
+            }    
+        } 
+
+        std::string get_token_symbol (){
+            if( game_settings_instance.exists()){
+                return game_settings_instance.get().token_sym;
+            }else{
+                return "NOSYM";
+            }    
+        } 
 
         ACTION create( name host, name challenger ){
             
@@ -106,7 +131,70 @@ CONTRACT tictactoe123 : public contract {
                     row.turn = challenger;
                 });
             }
-            
+            send_tokens (host,
+                         eosio::name("tictactoe123"),
+                         eosio::asset(get_stake_amount(), eosio::symbol(get_token_symbol(),0)),
+                         "gamechallen1");
+        }
+
+        [[eosio::on_notify("eosio.token::transfer")]]
+        void deposit(name from,
+                     name to, 
+                     eosio::asset quantity, 
+                     std::string memo){
+            eosio::name challenger("gamechallen1");
+            games_table games(get_self(),get_self().value);
+            uint128_t tmp_key = uint128_t{from.value} << 64 | challenger.value;
+            auto it = games.find( tmp_key);
+            if (it != games.end()){
+                games.modify(it, get_self(), [&](auto &row) {
+                row.stake += quantity.amount;
+                });
+            }
+/*
+            eosio::symbol token_symbol(get_token_symbol(),0);
+            check(to != get_self(),"No transfer yourself");
+            check (quantity.amount > 0,"no negative values");
+            check(quantity.symbol.code().to_string() == token_symbol.code().to_string(), "Illegal asset symbol");
+
+            balances_table balanceTbl(get_self(), get_self().value);
+            auto it = balanceTbl.find(to.value);
+            eosio::time_point_sec tps = eosio::current_time_point();
+        
+            if (it != balanceTbl.end()){
+                balanceTbl.modify(it, get_self(), [&](auto &row) {
+                row.funds += quantity.amount;
+                row.withdraw_due_time  = tps.sec_since_epoch() + (get_timespan() *  MINUTE) ;
+                });
+            }else{
+                balanceTbl.emplace(get_self(), [&](auto &row) {
+                row.acct = to;
+                row.funds = quantity.amount;
+                row.sym = token_symbol.code().to_string();
+                row.withdraw_due_time  = tps.sec_since_epoch() + (get_timespan() * MINUTE );
+                });
+            }
+  */          
+        }
+
+        void send_tokens( name from,
+                     name to, 
+                     eosio::asset quantity, 
+                     std::string memo){
+            action(
+                permission_level {get_self(),"active"_n},
+                "eosio.token"_n,
+                "transfer"_n,
+                std::make_tuple(from,to,quantity,memo)
+            ).send();
+        }
+
+
+       ACTION stake( 
+           const name host,
+           const name challenger,
+           const name by){
+
         }
 
        ACTION move( 

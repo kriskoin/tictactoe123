@@ -20,11 +20,20 @@ Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the 
 
 ## publish contract
 
-` cleos set contract tictactoe123 . -p tictactoe123@active `
+` cleos set contract tictactoe123 . -p tictactoe123@active `\
 #### remove contract
 ` cleos set contract tictactoe123 . --clear -p tictactoe123@active `
 
-##  Game Logics Actions
+## setup defalt contract values (singleton)
+
+### Set token symbol
+` cleos push action tictactoe123 setsymbol '{"symbol":"TICTAC"}' -p tictactoe123@active `
+
+### Set stake amount
+` cleos push action tictactoe123 setstake '{"stake":5}' -p tictactoe123@active `
+
+
+##  Game Logic Actions
 ` cleos push action tictactoe123 create '{"host":"gamehost1111","challenger":"gamechallen1"}' -p gamehost1111@active `
 
 ` cleos push action tictactoe123 move '{"host":"gamehost1111","challenger":"gamechallen1","by":"gamehost1111","row":1,"column":1}' -p gamehost1111@active `
@@ -32,6 +41,12 @@ Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the 
 ` cleos push action tictactoe123 move '{"host":"gamehost1111","challenger":"gamechallen1","by":"gamechallen1","row":3"column":1}' -p gamechallen1@active `
 
 ` cleos push action tictactoe123 close '{"host":"gamehost1111","challenger":"gamechallen1"}' -p gamehost1111@active `
+
+## Contract tables
+
+` cleos get table tictactoe123 tictactoe123 games `\ 
+` cleos get table tictactoe123 tictactoe123 leaderboards `\
+` cleos get table tictactoe123 tictactoe123 gamesettings  ` Singleton\
 
 ## Set TICTAC token
 
@@ -56,7 +71,7 @@ Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the 
 ### Check players balances
 
 ` cleos get currency balance eosio.token  gamehost1111  TICTAC `\
-` cleos get currency balance eosio.token  gamechallen1  TICTAC `
-` cleos get currency balance eosio.token  gamehost2222  TICTAC `
-` cleos get currency balance eosio.token  gamechallen2  TICTAC `
-` cleos get currency balance eosio.token  tictactoe123  TICTAC  `
+` cleos get currency balance eosio.token  gamechallen1  TICTAC `\
+` cleos get currency balance eosio.token  gamehost2222  TICTAC `\
+` cleos get currency balance eosio.token  gamechallen2  TICTAC `\
+` cleos get currency balance eosio.token  tictactoe123  TICTAC `\
