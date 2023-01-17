@@ -55,7 +55,7 @@ Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the 
 
 ### Check players balances
 
-` cleos get currency balance eosio.token  gamehost1111  TICTAC `
+` cleos get currency balance eosio.token  gamehost1111  TICTAC `\
 ` cleos get currency balance eosio.token  gamechallen1  TICTAC `
 ` cleos get currency balance eosio.token  gamehost2222  TICTAC `
 ` cleos get currency balance eosio.token  gamechallen2  TICTAC `
