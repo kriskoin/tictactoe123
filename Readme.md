@@ -49,6 +49,7 @@ Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the 
 ` cleos get table tictactoe123 tictactoe123 games `\ 
 ` cleos get table tictactoe123 tictactoe123 leaderboards `\
 ` cleos get table tictactoe123 tictactoe123 gamesettings  ` Singleton\
+` cleos get table tictactoe123 tictactoe123 playerbalances  `
 
 ## clear contract Tables
 ` cleos push action tictactoe123 clear '[]' -p tictactoe123@active `
@@ -72,6 +73,10 @@ Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the 
 ` cleos push action eosio.token transfer '{"from":"tictactoe123","to":"gamehost2222","quantity":"5 TICTAC","memo":"a TICTAC transfer"}' -p tictactoe123@active `
 
 ` cleos push action eosio.token transfer '{"from":"tictactoe123","to":"gamechallen2","quantity":"5 TICTAC","memo":"a TICTAC transfer"}' -p tictactoe123@active `
+
+### Setup balance within tictactoe123 contract
+` cleos push action eosio.token transfer '{"from":"gamechallen2","to":"tictactoe123","quantity":"5 TICTAC","memo":"a TICTAC transfer"}' -p gamechallen2@active `\
+
 
 ### Check players balances
 

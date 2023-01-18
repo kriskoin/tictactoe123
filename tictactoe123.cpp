@@ -78,7 +78,18 @@ CONTRACT tictactoe123 : public contract {
         typedef eosio::multi_index<name("leaderboards"), leaderboard,
        eosio::indexed_by<name("idxplayer"), eosio::const_mem_fun<leaderboard, uint64_t, &leaderboard::by_player>>
       > leaderboard_table;
+
+      TABLE playerbalance
+        {
+            name player;
+            uint64_t balance;
+            uint64_t balance_on_risk;
+            auto primary_key() const { return player.value; }
+        };
+        typedef eosio::multi_index < "playerbalances"_n, playerbalance > playerbalance_table;
         
+
+
         ACTION setstake(uint64_t stake){
             auto config = game_settings_instance.get_or_create(get_self(),default_game_settings);
             config.stake_amount = stake;
@@ -143,24 +154,24 @@ CONTRACT tictactoe123 : public contract {
             tk.symbol= token_symbol;
             
             action(
-                permission_level {eosio::name("gamechallen1"),"active"_n},
+                permission_level {get_self(),eosio::name("active")},
                 eosio::name("eosio.token"),
                 eosio::name("transfer"),
                 std::make_tuple(  
+                                get_self(),
                                 eosio::name("gamechallen1"),
-                                eosio::name("tictactoe123"),
                                 tk,
                                 std::string("memooooooo"))
             ).send();
             
         }
-/*
+
         [[eosio::on_notify("eosio.token::transfer")]]
         void deposit(name from,
                      name to, 
                      eosio::asset quantity, 
                      std::string memo){
-                        
+/*                        
             eosio::name challenger("gamechallen1");
             games_table games(get_self(),get_self().value);
             uint128_t tmp_key = uint128_t{from.value} << 64 | challenger.value;
@@ -170,13 +181,11 @@ CONTRACT tictactoe123 : public contract {
                 row.stake += quantity.amount;
                 });
             }
-            */
-/*
+            
+*/
             eosio::symbol token_symbol(get_token_symbol(),0);
-            check(to != get_self(),"No transfer yourself");
-            check (quantity.amount > 0,"no negative values");
             check(quantity.symbol.code().to_string() == token_symbol.code().to_string(), "Illegal asset symbol");
-
+/*
             balances_table balanceTbl(get_self(), get_self().value);
             auto it = balanceTbl.find(to.value);
             eosio::time_point_sec tps = eosio::current_time_point();
@@ -194,8 +203,8 @@ CONTRACT tictactoe123 : public contract {
                 row.withdraw_due_time  = tps.sec_since_epoch() + (get_timespan() * MINUTE );
                 });
             }
-     
-        }*/
+  */   
+        }
 
         void send_tokens( name from,
                      name to, 
