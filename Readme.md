@@ -12,17 +12,17 @@ Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the 
 ##  create account
 ` cleos create account eosio tictactoe123 EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV `
 ## set permissions:
-` cleos set account permission tictactoe123 active --add-code `
-` cleos set account permission gamehost1111 active --add-code `
+` cleos set account permission tictactoe123 active --add-code `\
+` cleos set account permission gamehost1111 active --add-code `\
 ` cleos set account permission gamechallen1 active --add-code `
 ## Compile contract
 
-` eosio-cpp -abigen tictactoe123.cpp -o tictactoe123.wasm `
+` eosio-cpp -abigen tictactoe123.cpp -o tictactoe123.wasm `\
 ` eosio-cpp -abigen tictactoe123.cpp -o tictactoe123.wasm  -R ./ricardian `
 
 ## publish contract
 
-` cleos set contract tictactoe123 . -p tictactoe123@active `\
+` cleos set contract tictactoe123 . -p tictactoe123@active `
 #### remove contract
 ` cleos set contract tictactoe123 . --clear -p tictactoe123@active `
 
@@ -49,7 +49,7 @@ Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the 
 ` cleos get table tictactoe123 tictactoe123 games `\ 
 ` cleos get table tictactoe123 tictactoe123 leaderboards `\
 ` cleos get table tictactoe123 tictactoe123 gamesettings  ` Singleton\
-` cleos get table tictactoe123 tictactoe123 playerbalances  `
+` cleos get table tictactoe123 tictactoe123 balance `  players` balance 
 
 ## clear contract Tables
 ` cleos push action tictactoe123 clear '[]' -p tictactoe123@active `
@@ -66,16 +66,19 @@ Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the 
 ` cleos push action eosio.token issue '{"to":"tictactoe123","quantity":"9000000 TICTAC","memo":"first issued"}' -p tictactoe123@active `
 
 ### Tranfer TICTAC token to the players
-` cleos push action eosio.token transfer '{"from":"tictactoe123","to":"gamehost1111","quantity":"5 TICTAC","memo":"a TICTAC transfer"}' -p tictactoe123@active `
+` cleos push action eosio.token transfer '{"from":"tictactoe123","to":"gamehost1111","quantity":"50 TICTAC","memo":"a TICTAC transfer"}' -p tictactoe123@active `
 
-` cleos push action eosio.token transfer '{"from":"tictactoe123","to":"gamechallen1","quantity":"5 TICTAC","memo":"a TICTAC transfer"}' -p tictactoe123@active `
+` cleos push action eosio.token transfer '{"from":"tictactoe123","to":"gamechallen1","quantity":"50 TICTAC","memo":"a TICTAC transfer"}' -p tictactoe123@active `
 
-` cleos push action eosio.token transfer '{"from":"tictactoe123","to":"gamehost2222","quantity":"5 TICTAC","memo":"a TICTAC transfer"}' -p tictactoe123@active `
+` cleos push action eosio.token transfer '{"from":"tictactoe123","to":"gamehost2222","quantity":"50 TICTAC","memo":"a TICTAC transfer"}' -p tictactoe123@active `
 
-` cleos push action eosio.token transfer '{"from":"tictactoe123","to":"gamechallen2","quantity":"5 TICTAC","memo":"a TICTAC transfer"}' -p tictactoe123@active `
+` cleos push action eosio.token transfer '{"from":"tictactoe123","to":"gamechallen2","quantity":"50 TICTAC","memo":"a TICTAC transfer"}' -p tictactoe123@active `
 
 ### Setup balance within tictactoe123 contract
-` cleos push action eosio.token transfer '{"from":"gamechallen2","to":"tictactoe123","quantity":"5 TICTAC","memo":"a TICTAC transfer"}' -p gamechallen2@active `\
+` cleos push action eosio.token transfer '{"from":"gamehost1111","to":"tictactoe123","quantity":"5 TICTAC","memo":"a TICTAC transfer"}' -p gamehost1111@active `\
+` cleos push action eosio.token transfer '{"from":"gamehost2222","to":"tictactoe123","quantity":"5 TICTAC","memo":"a TICTAC transfer"}' -p gamehost2222@active `\
+` cleos push action eosio.token transfer '{"from":"gamechallen1","to":"tictactoe123","quantity":"5 TICTAC","memo":"a TICTAC transfer"}' -p gamechallen1@active `\
+` cleos push action eosio.token transfer '{"from":"gamechallen2","to":"tictactoe123","quantity":"5 TICTAC","memo":"a TICTAC transfer"}' -p gamechallen2@active `
 
 
 ### Check players balances
@@ -84,4 +87,4 @@ Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the 
 ` cleos get currency balance eosio.token  gamechallen1  TICTAC `\
 ` cleos get currency balance eosio.token  gamehost2222  TICTAC `\
 ` cleos get currency balance eosio.token  gamechallen2  TICTAC `\
-` cleos get currency balance eosio.token  tictactoe123  TICTAC `\
+` cleos get currency balance eosio.token  tictactoe123  TICTAC `

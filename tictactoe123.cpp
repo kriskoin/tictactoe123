@@ -48,7 +48,6 @@ CONTRACT tictactoe123 : public contract {
             name winner = eosio::name("none");
             std::vector<uint8_t> board = {0,0,0,0,0,0,0,0,0};
             uint8_t marks = 0;
-            uint64_t stake;
             // Reset gamecleos
             void reset_game(){
                 board.assign(HIGH_BOUND_COL * HIGH_BOUND_ROW, 0);
@@ -58,12 +57,13 @@ CONTRACT tictactoe123 : public contract {
             }
             uint128_t primary_key() const { return id; }
             uint64_t  by_challenger() const { return challenger.value; }
-            EOSLIB_SERIALIZE( game, (id)(challenger)(host)(turn)(winner)(board)(marks)(stake))
+            EOSLIB_SERIALIZE( game, (id)(challenger)(host)(turn)(winner)(board)(marks))
         };
 
       typedef eosio::multi_index<name("games"), game,
        eosio::indexed_by<name("idxchall"), eosio::const_mem_fun<game, uint64_t, &game::by_challenger>>
       > games_table;
+
 
       TABLE leaderboard
         {
@@ -79,15 +79,13 @@ CONTRACT tictactoe123 : public contract {
        eosio::indexed_by<name("idxplayer"), eosio::const_mem_fun<leaderboard, uint64_t, &leaderboard::by_player>>
       > leaderboard_table;
 
-      TABLE playerbalance
-        {
+        TABLE balances {
             name player;
-            uint64_t balance;
-            uint64_t balance_on_risk;
+            int64_t funds = 0;
+            int64_t funds_in_play = 0;
             auto primary_key() const { return player.value; }
         };
-        typedef eosio::multi_index < "playerbalances"_n, playerbalance > playerbalance_table;
-        
+        typedef eosio::multi_index< "balance"_n, balances >  balances_table; 
 
 
         ACTION setstake(uint64_t stake){
@@ -120,10 +118,34 @@ CONTRACT tictactoe123 : public contract {
             }    
         } 
 
+        int64_t get_funds(name acct, int64_t stake){
+            balances_table balanceTbl(get_self(), get_self().value);
+            auto it = balanceTbl.find(acct.value);
+
+            if (it == balanceTbl.end()){
+                return 0;
+            }
+            
+            if ((it->funds - it->funds_in_play)<stake){
+                return 0;
+            }
+
+            balanceTbl.modify(it, get_self(), [&](auto &row) {
+                row.funds_in_play += stake;
+            });
+
+            return stake;
+        }
+
+
         ACTION create( name host, name challenger ){
             
             require_auth(host);
             check(challenger != host,"challenger and host must be diferent");
+
+            int64_t available_funds = get_funds(name,get_stake_amount());
+            check(available_funds != 0,"Account doesnt have funds");
+
             games_table games(get_self(),get_self().value);
 
             //checks for the chagenller
@@ -148,6 +170,7 @@ CONTRACT tictactoe123 : public contract {
                          eosio::asset(get_stake_amount(), eosio::symbol(get_token_symbol(),0)),
                          "gamechallen1");
             */
+           /*
             eosio::symbol token_symbol(get_token_symbol(),0);
             eosio::asset tk;
             tk.amount = 1;
@@ -163,7 +186,7 @@ CONTRACT tictactoe123 : public contract {
                                 tk,
                                 std::string("memooooooo"))
             ).send();
-            
+            */
         }
 
         [[eosio::on_notify("eosio.token::transfer")]]
@@ -171,39 +194,23 @@ CONTRACT tictactoe123 : public contract {
                      name to, 
                      eosio::asset quantity, 
                      std::string memo){
-/*                        
-            eosio::name challenger("gamechallen1");
-            games_table games(get_self(),get_self().value);
-            uint128_t tmp_key = uint128_t{from.value} << 64 | challenger.value;
-            auto it = games.find( tmp_key);
-            if (it != games.end()){
-                games.modify(it, get_self(), [&](auto &row) {
-                row.stake += quantity.amount;
-                });
-            }
-            
-*/
+
             eosio::symbol token_symbol(get_token_symbol(),0);
             check(quantity.symbol.code().to_string() == token_symbol.code().to_string(), "Illegal asset symbol");
-/*
+
             balances_table balanceTbl(get_self(), get_self().value);
-            auto it = balanceTbl.find(to.value);
-            eosio::time_point_sec tps = eosio::current_time_point();
-        
+            auto it = balanceTbl.find(from.value);
             if (it != balanceTbl.end()){
                 balanceTbl.modify(it, get_self(), [&](auto &row) {
                 row.funds += quantity.amount;
-                row.withdraw_due_time  = tps.sec_since_epoch() + (get_timespan() *  MINUTE) ;
                 });
             }else{
                 balanceTbl.emplace(get_self(), [&](auto &row) {
-                row.acct = to;
-                row.funds = quantity.amount;
-                row.sym = token_symbol.code().to_string();
-                row.withdraw_due_time  = tps.sec_since_epoch() + (get_timespan() * MINUTE );
+                row.player = from;
+                row.funds = quantity.amount;                
                 });
             }
-  */   
+  
         }
 
         void send_tokens( name from,
