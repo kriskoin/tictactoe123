@@ -48,6 +48,8 @@ CONTRACT tictactoe123 : public contract {
             name winner = eosio::name("none");
             std::vector<uint8_t> board = {0,0,0,0,0,0,0,0,0};
             uint8_t marks = 0;
+            int64_t host_stake = 0;
+            int64_t challenger_stake = 0;
             // Reset gamecleos
             void reset_game(){
                 board.assign(HIGH_BOUND_COL * HIGH_BOUND_ROW, 0);
@@ -57,7 +59,7 @@ CONTRACT tictactoe123 : public contract {
             }
             uint128_t primary_key() const { return id; }
             uint64_t  by_challenger() const { return challenger.value; }
-            EOSLIB_SERIALIZE( game, (id)(challenger)(host)(turn)(winner)(board)(marks))
+            EOSLIB_SERIALIZE( game, (id)(challenger)(host)(turn)(winner)(board)(marks)(host_stake)(challenger_stake))
         };
 
       typedef eosio::multi_index<name("games"), game,
@@ -82,7 +84,6 @@ CONTRACT tictactoe123 : public contract {
         TABLE balances {
             name player;
             int64_t funds = 0;
-            int64_t funds_in_play = 0;
             auto primary_key() const { return player.value; }
         };
         typedef eosio::multi_index< "balance"_n, balances >  balances_table; 
@@ -102,7 +103,7 @@ CONTRACT tictactoe123 : public contract {
            
         }
 
-        uint64_t get_stake_amount (){
+        inline uint64_t get_stake_amount (){
             if( game_settings_instance.exists()){
                 return game_settings_instance.get().stake_amount;
             }else{
@@ -110,7 +111,7 @@ CONTRACT tictactoe123 : public contract {
             }    
         } 
 
-        std::string get_token_symbol (){
+        inline std::string get_token_symbol (){
             if( game_settings_instance.exists()){
                 return game_settings_instance.get().token_sym;
             }else{
@@ -118,23 +119,14 @@ CONTRACT tictactoe123 : public contract {
             }    
         } 
 
-        int64_t get_funds(name acct, int64_t stake){
+        inline int64_t get_funds(name acct){
             balances_table balanceTbl(get_self(), get_self().value);
             auto it = balanceTbl.find(acct.value);
 
             if (it == balanceTbl.end()){
                 return 0;
             }
-            
-            if ((it->funds - it->funds_in_play)<stake){
-                return 0;
-            }
-
-            balanceTbl.modify(it, get_self(), [&](auto &row) {
-                row.funds_in_play += stake;
-            });
-
-            return stake;
+            return it->funds;
         }
 
 
@@ -143,27 +135,23 @@ CONTRACT tictactoe123 : public contract {
             require_auth(host);
             check(challenger != host,"challenger and host must be diferent");
 
-            int64_t available_funds = get_funds(name,get_stake_amount());
-            check(available_funds != 0,"Account doesnt have funds");
+            check(get_stake_amount ()<= get_funds(host),"Account doesnt have enough funds");
 
             games_table games(get_self(),get_self().value);
-
-            //checks for the chagenller
-            auto idx_chg = games.get_index<name("idxchall")>();
-            auto tmp_chg = idx_chg.lower_bound(challenger.value);
-            check(tmp_chg ==idx_chg.end(),"Challenger already exits"); 
 
             uint128_t tmp_key = uint128_t{host.value} << 64 | challenger.value;
             auto record = games.find( tmp_key);
 
-            if( record == games.end() ){
-                games.emplace(get_self(), [&]( auto& row ) {
-                    row.id = tmp_key;
-                    row.challenger = challenger;
-                    row.host = host;  
-                    row.turn = challenger;
-                });
-            }
+            check (record == games.end(),"Game already exits");
+
+            games.emplace(get_self(), [&]( auto& row ) {
+                row.id = tmp_key;
+                row.challenger = challenger;
+                row.host = host;  
+                row.turn = challenger;
+            });
+            
+            stake_funds (host,true, get_stake_amount(), tmp_key );
             /*
             send_tokens (host,
                          eosio::name("tictactoe123"),
@@ -187,6 +175,36 @@ CONTRACT tictactoe123 : public contract {
                                 std::string("memooooooo"))
             ).send();
             */
+        }
+
+         void stake_funds (name player,bool host_flag,int64_t funds, uint128_t game_id ){
+            balances_table balanceTbl(get_self(), get_self().value);
+            auto balance_record = balanceTbl.find(player.value);
+
+            games_table games(get_self(),get_self().value);
+            auto game_record = games.find( game_id);
+
+            if (balance_record != balanceTbl.end() &&
+                game_record != games.end()){
+
+                    balanceTbl.modify(balance_record, get_self(), [&](auto &row) {
+                        row.funds -= funds;
+                    });
+
+                    games.modify(game_record, get_self(), [&](auto &g) {
+                        if(host_flag){
+                            print("host");
+                            g.host_stake = funds;
+                        }else{
+                            //print("challenger before :",g.challenger_stake);
+                            //print("\n");
+                            g.challenger_stake = funds;
+                            print("challenger after :",g.challenger_stake);
+                            print("\n");
+                        }
+                    });
+        
+            }
         }
 
         [[eosio::on_notify("eosio.token::transfer")]]
@@ -226,12 +244,7 @@ CONTRACT tictactoe123 : public contract {
         }
 
 
-       ACTION stake( 
-           const name host,
-           const name challenger,
-           const name by){
-
-        }
+       
 
        ACTION move( 
            const name host,
@@ -249,13 +262,23 @@ CONTRACT tictactoe123 : public contract {
             uint128_t tmp_key = uint128_t{host.value} << 64 | challenger.value;
             auto itr = games.find( tmp_key);
             check(itr!=games.end(),"Game does not exists");
+            
+            //check if the challenger has funds and stake on the game
+            if(challenger == by && !itr->challenger_stake){
+                print("ACA");
+                check(get_stake_amount ()<= get_funds(challenger),"Challenger account doesnt have enough funds");
+                stake_funds (challenger,false, get_stake_amount(), tmp_key );
+            }
+            games_table games2(get_self(),get_self().value);
+            auto itr2 = games2.find( tmp_key);
+            //check(host == by && itr2->challenger_stake,"Challenger account dont stake yet!");
 
-            check(itr->winner == eosio::name("none") ,"game is over, winner detected"); 
+            check(itr2->winner == eosio::name("none") ,"game is over, winner detected"); 
 
-            check((itr->winner == eosio::name("none") && itr->marks != 9),"game is over, tie detected");
+            check((itr2->winner == eosio::name("none") && itr2->marks != 9),"game is over, tie detected");
          
             uint8_t board_position = get_position(row,column);
-            check (is_empy_cell(board_position,itr->board),"This position is already used");
+            check (is_empy_cell(board_position,itr2->board),"This position is already used");
 
             
             
@@ -269,8 +292,9 @@ CONTRACT tictactoe123 : public contract {
                 player_mark = CHALLENGER_MARK;
                 next_turn = host;
             }
-
-             games.modify(itr, get_self(), [&](auto &g) {
+            
+            
+            games.modify(itr, get_self(), [&](auto &g) {
                 g.board[board_position] = player_mark;
                 g.turn = next_turn;
                 g.marks++;
@@ -422,7 +446,7 @@ CONTRACT tictactoe123 : public contract {
         *        within  [LOW_BOUND_ROW,HIGH_BOUND_ROW ]
         *        and  [LOW_BOUND_COL,HIGH_BOUND_COL] ranges
         */
-        uint8_t get_position (
+        inline uint8_t get_position (
            const uint8_t row,
            const uint8_t column
         ){

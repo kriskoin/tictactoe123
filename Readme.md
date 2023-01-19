@@ -32,7 +32,7 @@ Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the 
 ` cleos push action tictactoe123 setsymbol '{"symbol":"TICTAC"}' -p tictactoe123@active `
 
 ### Set stake amount
-` cleos push action tictactoe123 setstake '{"stake":1}' -p tictactoe123@active `
+` cleos push action tictactoe123 setstake '{"stake":2}' -p tictactoe123@active `
 
 
 ##  Game Logic Actions
@@ -46,7 +46,7 @@ Accounts gamehost1111, gamechallen1,gamehost2222,gamechallen2 must exits in the 
 
 ## Contract tables
 
-` cleos get table tictactoe123 tictactoe123 games `\ 
+` cleos get table tictactoe123 tictactoe123 games `\
 ` cleos get table tictactoe123 tictactoe123 leaderboards `\
 ` cleos get table tictactoe123 tictactoe123 gamesettings  ` Singleton\
 ` cleos get table tictactoe123 tictactoe123 balance `  players` balance 
