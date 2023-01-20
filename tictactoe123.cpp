@@ -103,33 +103,6 @@ CONTRACT tictactoe123 : public contract {
            
         }
 
-        inline uint64_t get_stake_amount (){
-            if( game_settings_instance.exists()){
-                return game_settings_instance.get().stake_amount;
-            }else{
-                return 0;
-            }    
-        } 
-
-        inline std::string get_token_symbol (){
-            if( game_settings_instance.exists()){
-                return game_settings_instance.get().token_sym;
-            }else{
-                return "NOSYM";
-            }    
-        } 
-
-        inline int64_t get_funds(name acct){
-            balances_table balanceTbl(get_self(), get_self().value);
-            auto it = balanceTbl.find(acct.value);
-
-            if (it == balanceTbl.end()){
-                return 0;
-            }
-            return it->funds;
-        }
-
-
         ACTION create( name host, name challenger ){
             
             require_auth(host);
@@ -177,76 +150,21 @@ CONTRACT tictactoe123 : public contract {
             */
         }
 
-         void stake_funds (name player,bool host_flag,int64_t funds, uint128_t game_id ){
-            balances_table balanceTbl(get_self(), get_self().value);
-            auto balance_record = balanceTbl.find(player.value);
-
+        ACTION restart(const name challenger, const name host, const name by){
+            require_auth(by);
+            check(challenger != host,"challenger and host must be diferent");
+            
             games_table games(get_self(),get_self().value);
-            auto game_record = games.find( game_id);
-
-            if (balance_record != balanceTbl.end() &&
-                game_record != games.end()){
-
-                    balanceTbl.modify(balance_record, get_self(), [&](auto &row) {
-                        row.funds -= funds;
-                    });
-
-                    games.modify(game_record, get_self(), [&](auto &g) {
-                        if(host_flag){
-                            print("host");
-                            g.host_stake = funds;
-                        }else{
-                            //print("challenger before :",g.challenger_stake);
-                            //print("\n");
-                            g.challenger_stake = funds;
-                            print("challenger after :",g.challenger_stake);
-                            print("\n");
-                        }
-                    });
-        
-            }
+            uint128_t tmp_key = uint128_t{host.value} << 64 | challenger.value;
+            auto itr = games.find( tmp_key);
+            check(itr != games.end(),"Game does not exists");
+            // Reset game
+            games.modify(itr, itr->host, [](auto &g) {
+                g.reset_game();
+            });
         }
 
-        [[eosio::on_notify("eosio.token::transfer")]]
-        void deposit(name from,
-                     name to, 
-                     eosio::asset quantity, 
-                     std::string memo){
-
-            eosio::symbol token_symbol(get_token_symbol(),0);
-            check(quantity.symbol.code().to_string() == token_symbol.code().to_string(), "Illegal asset symbol");
-
-            balances_table balanceTbl(get_self(), get_self().value);
-            auto it = balanceTbl.find(from.value);
-            if (it != balanceTbl.end()){
-                balanceTbl.modify(it, get_self(), [&](auto &row) {
-                row.funds += quantity.amount;
-                });
-            }else{
-                balanceTbl.emplace(get_self(), [&](auto &row) {
-                row.player = from;
-                row.funds = quantity.amount;                
-                });
-            }
-  
-        }
-
-        void send_tokens( name from,
-                     name to, 
-                     eosio::asset quantity, 
-                     std::string memo){
-            action(
-                permission_level {from,"active"_n},
-                "eosio.token"_n,
-                "transfer"_n,
-                std::make_tuple(from,to,quantity,memo)
-            ).send();
-        }
-
-
-       
-
-       ACTION move( 
+        ACTION move( 
            const name host,
            const name challenger,
            const name by,
@@ -263,9 +181,10 @@ CONTRACT tictactoe123 : public contract {
             auto itr = games.find( tmp_key);
             check(itr!=games.end(),"Game does not exists");
             
+            check (by == itr->turn,"Its not your turn");
+
             //check if the challenger has funds and stake on the game
             if(challenger == by && !itr->challenger_stake){
-                print("ACA");
                 check(get_stake_amount ()<= get_funds(challenger),"Challenger account doesnt have enough funds");
                 stake_funds (challenger,false, get_stake_amount(), tmp_key );
             }
@@ -314,6 +233,17 @@ CONTRACT tictactoe123 : public contract {
             uint128_t tmp_key = uint128_t{host.value} << 64 | challenger.value;
             auto record = games.find( tmp_key);
             if( record != games.end() ){
+                //unstake  players balances
+                balances_table balanceTbl(get_self(), get_self().value);
+                auto balance_record = balanceTbl.find(record->host.value);
+                balanceTbl.modify(balance_record, get_self(), [&](auto &g) {
+                    g.funds +=record->host_stake;
+                });
+                balance_record = balanceTbl.find(record->challenger.value);
+                balanceTbl.modify(balance_record, get_self(), [&](auto &g) {
+                    g.funds +=record->challenger_stake;
+                });
+        
                 record = games.erase(record);
             }
             
@@ -324,10 +254,109 @@ CONTRACT tictactoe123 : public contract {
             games_table games(get_self(),get_self().value);
             auto itr = games.begin();
             while (itr != games.end()) {
+                //unstake  players balances
+                balances_table balanceTbl(get_self(), get_self().value);
+                auto balance_record = balanceTbl.find(itr->host.value);
+                balanceTbl.modify(balance_record, get_self(), [&](auto &g) {
+                    g.funds +=itr->host_stake;
+                });
+                balance_record = balanceTbl.find(itr->challenger.value);
+                balanceTbl.modify(balance_record, get_self(), [&](auto &g) {
+                    g.funds +=itr->challenger_stake;
+                });
+
                 itr = games.erase(itr);
             }
         }
-    
+
+        [[eosio::on_notify("eosio.token::transfer")]]
+        void deposit(name from,
+                     name to, 
+                     eosio::asset quantity, 
+                     std::string memo){
+
+            eosio::symbol token_symbol(get_token_symbol(),0);
+            check(quantity.symbol.code().to_string() == token_symbol.code().to_string(), "Illegal asset symbol");
+
+            balances_table balanceTbl(get_self(), get_self().value);
+            auto it = balanceTbl.find(from.value);
+            if (it != balanceTbl.end()){
+                balanceTbl.modify(it, get_self(), [&](auto &row) {
+                row.funds += quantity.amount;
+                });
+            }else{
+                balanceTbl.emplace(get_self(), [&](auto &row) {
+                row.player = from;
+                row.funds = quantity.amount;                
+                });
+            }
+  
+        }
+
+        void stake_funds (name player,bool host_flag,int64_t funds, uint128_t game_id ){
+            balances_table balanceTbl(get_self(), get_self().value);
+            auto balance_record = balanceTbl.find(player.value);
+
+            games_table games(get_self(),get_self().value);
+            auto game_record = games.find( game_id);
+
+            if (balance_record != balanceTbl.end() &&
+                game_record != games.end()){
+
+                    balanceTbl.modify(balance_record, get_self(), [&](auto &row) {
+                        row.funds -= funds;
+                    });
+
+                    games.modify(game_record, get_self(), [&](auto &g) {
+                        if(host_flag){
+                            g.host_stake = funds;
+                        }else{
+                            g.challenger_stake = funds;
+                        }
+                    });
+        
+            }
+        }
+
+
+        void send_tokens( name from,
+                     name to, 
+                     eosio::asset quantity, 
+                     std::string memo){
+            action(
+                permission_level {from,"active"_n},
+                "eosio.token"_n,
+                "transfer"_n,
+                std::make_tuple(from,to,quantity,memo)
+            ).send();
+        }
+
+        inline uint64_t get_stake_amount (){
+            if( game_settings_instance.exists()){
+                return game_settings_instance.get().stake_amount;
+            }else{
+                return 0;
+            }    
+        } 
+
+        inline std::string get_token_symbol (){
+            if( game_settings_instance.exists()){
+                return game_settings_instance.get().token_sym;
+            }else{
+                return "NOSYM";
+            }    
+        } 
+
+        inline int64_t get_funds(name acct){
+            balances_table balanceTbl(get_self(), get_self().value);
+            auto it = balanceTbl.find(acct.value);
+
+            if (it == balanceTbl.end()){
+                return 0;
+            }
+            return it->funds;
+        }
+
        /**
         *
         *  This fuction checks is a cell is empty
@@ -478,19 +507,7 @@ CONTRACT tictactoe123 : public contract {
         }
 
         
-        ACTION restart(const name challenger, const name host, const name by){
-            require_auth(by);
-            check(challenger != host,"challenger and host must be diferent");
-            
-            games_table games(get_self(),get_self().value);
-            uint128_t tmp_key = uint128_t{host.value} << 64 | challenger.value;
-            auto itr = games.find( tmp_key);
-            check(itr != games.end(),"Game does not exists");
-            // Reset game
-            games.modify(itr, itr->host, [](auto &g) {
-                g.reset_game();
-            });
-        }
+        
 
         void update_leaderboard(name player,uint32_t win ,uint32_t lost ){
             leaderboard_table leaders(get_self(),get_self().value);
