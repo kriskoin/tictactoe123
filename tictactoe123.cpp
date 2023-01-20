@@ -293,8 +293,9 @@ CONTRACT tictactoe123 : public contract {
                 next_turn = host;
             }
             
-            
-            games.modify(itr, get_self(), [&](auto &g) {
+             games_table games3(get_self(),get_self().value);
+            auto itr3 = games3.find( tmp_key);
+            games3.modify(itr3, get_self(), [&](auto &g) {
                 g.board[board_position] = player_mark;
                 g.turn = next_turn;
                 g.marks++;
